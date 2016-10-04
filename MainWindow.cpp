@@ -308,25 +308,30 @@ MainWindow::createGroupDisplay()
 	groupBox->setMinimumHeight(700);
 	groupBox->setStyleSheet(GroupBoxStyle);
 
-	// create stacked widget for input/output images
-	m_stackWidgetImages = new QStackedWidget;
-
-	// add QLabels to image stacked widget to display input/output images
-	for(int i = 0; i<2; ++i)
-		m_stackWidgetImages->addWidget(new QLabel);
-
-	// add centering alignment on both labels
-	QLabel *label;
-	label = (QLabel *) m_stackWidgetImages->widget(0); label->setAlignment(Qt::AlignCenter);
-	label = (QLabel *) m_stackWidgetImages->widget(1); label->setAlignment(Qt::AlignCenter);
-
-	// set stacked widget to default setting: input image
-	m_stackWidgetImages->setCurrentIndex(0);
-
-	// assemble stacked widget in vertical layout
+	m_imageGL = new QGLDisplay;
 	QVBoxLayout *vbox = new QVBoxLayout;
-	vbox->addWidget(m_stackWidgetImages);
+	vbox->addWidget(m_imageGL);
+
 	groupBox->setLayout(vbox);
+	// create stacked widget for input/output images
+	//m_stackWidgetImages = new QStackedWidget;
+
+	//// add QLabels to image stacked widget to display input/output images
+	//for(int i = 0; i<2; ++i)
+	//	m_stackWidgetImages->addWidget(new QLabel);
+
+	//// add centering alignment on both labels
+	//QLabel *label;
+	//label = (QLabel *) m_stackWidgetImages->widget(0); label->setAlignment(Qt::AlignCenter);
+	//label = (QLabel *) m_stackWidgetImages->widget(1); label->setAlignment(Qt::AlignCenter);
+
+	//// set stacked widget to default setting: input image
+	//m_stackWidgetImages->setCurrentIndex(0);
+
+	//// assemble stacked widget in vertical layout
+	//QVBoxLayout *vbox = new QVBoxLayout;
+	//vbox->addWidget(m_stackWidgetImages);
+	//groupBox->setLayout(vbox);
 
 	return groupBox;
 }
@@ -639,7 +644,7 @@ void MainWindow::display(int flag)
 	if(m_imageDst.isNull() && flag) return;		// no output image
 
 	// raise the appropriate widget from the stack
-	m_stackWidgetImages->setCurrentIndex(flag);
+	//m_stackWidgetImages->setCurrentIndex(flag);
 
 	// set radio button
 	m_radioDisplay[flag]->setChecked(1);
@@ -650,29 +655,42 @@ void MainWindow::display(int flag)
 		I = m_imageSrc;
 	else	I = m_imageDst;
 
+
+	IP_IPtoQImage(I, m_imageCurr);
+
+	m_imageGL->updateImage();
+
+	//m_imageGL->initializeTexture(q);
 	// init image dimensions
-	int  w = I->width();
-	int  h = I->height();
+//	int  w = I->width();
+	//int  h = I->height();
 
 	// init view window dimensions
-	int ww = m_stackWidgetImages->width();
-	int hh = m_stackWidgetImages->height();
+	//int ww = m_stackWidgetImages->width();
+	//int hh = m_stackWidgetImages->height();
 
 	// convert from ImagePtr to QImage to Pixmap
-	QImage q;
-	IP_IPtoQImage(I, q);
+	//QImage q;
+	//IP_IPtoQImage(I, q);
 
 	// convert from QImage to Pixmap; rescale if image is larger than view window
-	QPixmap p;
-	if(MIN(w, h) > MIN(ww, hh))
-		p = QPixmap::fromImage(q.scaled(QSize(ww, hh), Qt::KeepAspectRatio));
-	else	p = QPixmap::fromImage(q);
+	//QPixmap p;
 
-	// assign pixmap to label widget for display
-	QLabel *widget = (QLabel *) m_stackWidgetImages->currentWidget();
-	widget->setPixmap(p);
+	/***********************/
+	// gl
+	//p = QPixmap::fromImage(q);
 
-	// compute average runtime if time checkbox is set
+	/********************************/
+	
+	//if(MIN(w, h) > MIN(ww, hh))
+	//	p = QPixmap::fromImage(q.scaled(QSize(ww, hh), Qt::KeepAspectRatio));
+	//else	p = QPixmap::fromImage(q);
+
+	//// assign pixmap to label widget for display
+	//QLabel *widget = (QLabel *) m_stackWidgetImages->currentWidget();
+	//widget->setPixmap(p);
+
+	//// compute average runtime if time checkbox is set
 	time();
 
 	// compute histogram if histogram checkbox is set

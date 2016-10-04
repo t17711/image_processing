@@ -1,15 +1,19 @@
 TEMPLATE    = app
 TARGET      = qip
-QT 	   += widgets printsupport
+QT 		+= widgets opengl
+QT 	   	+= widgets printsupport
+
+
 OBJECTS_DIR = ./obj
 MOC_DIR     = ./moc
-
+RESOURCES   = qip.qrc
 
 win32-msvc2013 {
-	INCLUDEPATH 	+= ./IP/win/header
+	LIBS 		+= -lopengl32 -lglu32
+	INCLUDEPATH += ./IP/win/header
 	LIBS 		+= -L./IP/win/lib
-	LIBS 		+= -lIP_d
-	QMAKE_CXXFLAGS  += /MP /Zi
+	LIBS 		+= -lopengl32 -lIP_d
+	QMAKE_CXXFLAGS += /MP /Zi
 }
 
 
@@ -31,6 +35,7 @@ unix:!macx {
 
 # Input
 HEADERS +=	MainWindow.h	\
+		QGLDisplay.h	\
 		ImageFilter.h	\
 		qcustomplot.h	\
 		Dummy.h		\
@@ -45,6 +50,7 @@ HEADERS +=	MainWindow.h	\
 		
 SOURCES +=	main.cpp	\ 
 		MainWindow.cpp 	\
+		QGLDisplay.cpp	\
 		ImageFilter.cpp	\
 		qcustomplot.cpp	\
 		Dummy.cpp	\

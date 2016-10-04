@@ -30,6 +30,8 @@
 #include "ImageFilter.h"
 #include "qcustomplot.h"
 
+#include "QGLDisplay.h"
+
 #define MAXFILTERS	50
 
 using namespace IP;
@@ -42,6 +44,10 @@ public:
 	MainWindow	(QWidget *parent = 0);
 	ImagePtr	imageSrc	() const;
 	ImagePtr	imageDst	() const;
+	
+	// for gl
+	QImage	imageDisp() const;
+
 	QCustomPlot*	histogram()	{return m_histogram;}
 	void		preview		();
 
@@ -98,7 +104,15 @@ private:
 	QStackedWidget*		m_stackWidgetPanels;	// stacked widget for control panels
 
 	// widgets for image display groupbox
-	QStackedWidget*		m_stackWidgetImages;	// stacked widget for input/output images
+	//QStackedWidget*		m_stackWidgetImages;	// stacked widget for input/output images
+	
+	
+	/********************************************************/
+	QGLDisplay* m_image_display; // glsl image display
+	QGLDisplay* m_imageGL; // glsl image display
+	QImage  m_imageCurr;
+	/*******************************************************/
+
 	QRadioButton*		m_radioDisplay[2];	// radio buttons for input/output
 	QRadioButton*		m_radioMode   [2];	// radio buttons for RGB/Gray modes
 	QCheckBox*		m_checkboxHisto;	// checkbox: histogram display
@@ -151,4 +165,9 @@ MainWindow::imageDst() const
 	return m_imageDst;
 }
 
+inline QImage
+MainWindow::imageDisp() const
+{
+	return m_imageCurr;
+}
 #endif // MAINWINDOW_H
