@@ -662,7 +662,7 @@ void MainWindow::display(int flag)
 
 	//m_imageGL->initializeTexture(q);
 	// init image dimensions
-//	int  w = I->width();
+	//	int  w = I->width();
 	//int  h = I->height();
 
 	// init view window dimensions
@@ -689,6 +689,7 @@ void MainWindow::display(int flag)
 	//// assign pixmap to label widget for display
 	//QLabel *widget = (QLabel *) m_stackWidgetImages->currentWidget();
 	//widget->setPixmap(p);
+
 
 	//// compute average runtime if time checkbox is set
 	time();

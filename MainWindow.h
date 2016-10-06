@@ -108,7 +108,7 @@ private:
 	
 	
 	/********************************************************/
-	QGLDisplay* m_image_display; // glsl image display
+	//QGLDisplay* m_image_display; // glsl image display
 	QGLDisplay* m_imageGL; // glsl image display
 	QImage  m_imageCurr;
 	/*******************************************************/

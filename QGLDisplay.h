@@ -49,18 +49,11 @@ private:
 
 	QGLShaderProgram  *m_program;
 	//QGLTexture *m_texture;
-	GLuint m_textures, m_position, m_texcoord; //texture stored here
+	GLuint m_textures;// m_position, m_texcoord; //texture stored here
 	
-	QVector<QVector3D> m_vertices;
-	QVector<QVector2D> m_texCoords;
+	QVector<vec2> m_vertices;
+	QVector<vec2> m_texCoords;
 
-	//// shader file names
-	//QString v_shader;
-	//QString f_shader;
-
-	//// vertex shader files
-	//QGLShader* m_vert;
-	//QGLShader* m_frag;
 
 	};
 

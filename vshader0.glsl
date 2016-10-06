@@ -1,15 +1,9 @@
-#ifdef GL_ES
-// Set default precision to medium
-precision mediump int;
-precision mediump float;
-#endif
+#version 410
 
-//uniform mat4 mvp_matrix;
+in vec4 a_position;
+in vec2 a_texcoord;
 
-attribute vec4 a_position;
-attribute vec2 a_texcoord;
-
-varying vec2 v_texcoord;
+out vec2 v_texcoord;
 
 void main()
 {
