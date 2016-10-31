@@ -34,3 +34,21 @@ Dummy::controlPanel()
 	m_ctrlGrp = new QGroupBox("");
 	return(m_ctrlGrp);
 }
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Dummy::initShader:
+//
+// init shader program and parameters.
+//
+void
+Dummy::initShader() {}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Dummy::gpuProgram:
+//
+// Active gpu program
+//
+void
+Dummy::gpuProgram(int) {}

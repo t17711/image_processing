@@ -17,20 +17,26 @@ class Threshold : public ImageFilter {
 	Q_OBJECT
 
 public:
-	Threshold			(QWidget *parent = 0);	// constructor
-	QGroupBox*	controlPanel	();			// create control panel
-	bool		applyFilter	(ImagePtr, ImagePtr);	// apply filter to input
-	void		reset		();			// reset parameters
+	Threshold			(QWidget *parent = 0);		// constructor
+	QGroupBox*	controlPanel	();				// create control panel
+	bool		applyFilter	(ImagePtr, bool, ImagePtr);	// apply filter to input
+	void		reset		();				// reset parameters
 	void		threshold	(ImagePtr, int, ImagePtr);
+	void		initShader	();
+	void		gpuProgram	(int pass);			// use GPU program to apply filter
+
+	
+
 
 protected slots:
 	void		changeThr	(int);
 
 private:
 	// widgets
-	QSlider		*m_slider ;	// Threshold slider
-	QSpinBox	*m_spinBox;	// Threshold spinbox
-	QGroupBox	*m_ctrlGrp;	// Groupbox for panel
+	QSlider*	m_slider ;	// Threshold slider
+	QSpinBox*	m_spinBox;	// Threshold spinbox
+	QGroupBox*	m_ctrlGrp;	// Groupbox for panel
+
 };
 
 #endif	// THRESHOLD_H

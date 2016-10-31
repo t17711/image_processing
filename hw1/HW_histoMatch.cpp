@@ -3,123 +3,82 @@
 //
 // Apply histogram matching to I1. Output is in I2.
 //
-// Written by: ADD YOUR NAMES HERE, 2016
-//
 void
 HW_histoMatch(ImagePtr I1, ImagePtr Ilut, ImagePtr I2)
 {
-	IP_copyImageHeader(I1, I2);  // copys width height and other properties from i1 to i2
-	int w = I1->width();  // input image
+	IP_copyImageHeader(I1, I2);
+	int w = I1->width ();
 	int h = I1->height();
-	int total = w * h; // 
+	int total = w * h;
 
-	int histogram_input[MXGRAY]; // image histogram
-	int histogram_target[MXGRAY];
+	// scale dynamic range of I1 to full intensity range [0,255]
+	IP_embedRange(I1, 0., (double)MaxGray, I2);
 
-	int left[MXGRAY];
-	int right[MXGRAY];
-	int reserveLeft[MXGRAY];
+	// allocate memory
+	int len = Ilut->width();
+	if(len <= MaxGray)
+		fprintf(stderr, "IP_histogramMatch: warning %d\n", len);
+	int	*lut = new  int[len];
+	double	*dd1 = new double[w];
+	if(dd1 == NULL) IP_bailout("IP_histogramMatch: No memory");
 
-	/*-----------------------------------------------------*/
-	// this  calculates histogram of image
+	int	  h1[MXGRAY],   lim[MXGRAY], luttype=0, *h2, t=0, R;
+	int	left[MXGRAY], right[MXGRAY], indx[MXGRAY];
+	double	hmin, hmax;
+	ChannelPtr<uchar> p, endd, lutp;
+	for(int ch=0; IP_getChannel(I2, ch, p, t); ch++) {
+		IP_getChannel(Ilut, ch, lutp, luttype);
+		h2 = (int *) &lutp[0];
 
-	for (int i = 0; i < MXGRAY; ++i) histogram_input[i] = 0;
-	ChannelPtr<uchar> p1, endd;
-	int type1;
-	for (int ch = 0; IP_getChannel(I1, ch, p1, type1); ch++){
-		for (endd = p1 + total; p1 < endd;) histogram_input[*p1++]++;
-	}
-	/*---------------------------------------------------------------------------------------*/
-
-	/*---------------------------------------------------------------------------------------*/
-	/* normalize h2 to conform with dimensions of I1 */
-	float Havg; // find level to equalize
-	ChannelPtr<int> lut; 
-	int type2;
-	IP_getChannel(Ilut, 0, lut, type2);
-
-	// first get average. sum all value and divide total by it
-	for (int i = Havg = 0; i<MXGRAY; i++) Havg += lut[i];
-	float scale = (float)total / Havg;
-
-	// get integer histogram to match our input image histogram 	
-	for (int i = 0; i < MXGRAY; i++) histogram_target[i] = (int)round(lut[i] * scale);
-
-	/*---------------------------------------------------------------------------------------*/
-
-	/*---------------------------------------------------------------------------------------*/
-	/* normalize h2 to conform with dimensions of I1 */
-	int R = 0;
-	int Hsum = 0;
-	int amount_to_fill = 0;
-
-	//create temporary left to track overflow later
-	int left2[MXGRAY];
-
-	/// this is to get left reserve for pixel frequency. so this shows how much pixel i can add in histogram
-	for (int i = 0; i<MXGRAY; i++) {
-		left[i] = R; /* left end of interval */
-		left2[i] = R; /* left end of interval */
-		amount_to_fill = histogram_target[R] - Hsum;
-
-		// now reserve space for max amount of pixel i to put in leftmost space of histogram
-		reserveLeft[i] = (amount_to_fill > histogram_input[i]) ? 0 : amount_to_fill; // max amount of i on left
-
-		Hsum += histogram_input[i]; /* cum. interval value */
-		while (Hsum>histogram_target[R] && (MXGRAY - 1)>R) { /* make interval wider */
-			Hsum -= histogram_target[R]; /* adjust Hsum */
-			R++; /* update right end */
-		}
-		right[i] = R;
-	}
-
-	// create temporary empty histogram
-	for (int i = 0; i<MXGRAY; i++) histogram_input[i] = 0;
-
-	int type;
-	ChannelPtr<uchar> p2;
-
-	for (int ch = 0; IP_getChannel(I1, ch, p1, type); ch++) {
-		IP_getChannel(I2, ch, p2, type); // gets channle 0 1 or 2 (r, g ,b) array 
-		for (endd = p1 + total; p1 < endd;) {
-			int p = left[*p1];
-
-			//now compare how much of value can be added to the slot by comparing reserved place
-			if (histogram_input[p] < histogram_target[p]){
-
-				// if histogram output  value is less than avg then copy point
-				// but 1st check if it is reserved space
-				if (left2[*p1] != p) *p2 = p;
-
-				// so check if left[*p1] is original left 
-				else {
-
-					//if it is so then check the reserved value, if
-					if (reserveLeft[*p1] > 0){
-						reserveLeft[*p1]--;
-						*p2 = p;
-					}
-
-					//	reserved value is 0, then move to next place 
-					else{
-						left[*p1] = (p + 1 < right[*p1]) ? p + 1 : right[*p1];
-						p = left[*p1];
-						*p2 = p;
-					}
+		// scale h2 to conform with dimensions of I1
+		int Hsum =0;
+		for(int i=0; i < MXGRAY; i++) Hsum += h2[i];
+		double scale = (double) total / Hsum;
+		if(scale != 1) {
+			Hsum = 0;
+			for(int i=0; i < MXGRAY; i++) {
+				h2[i]  = ROUND(h2[i] * scale);
+				Hsum  += h2[i];
+				if(Hsum > total) {
+					h2[i] -= (Hsum-total);
+					for(; i < MXGRAY; i++) h2[i] = 0;
 				}
 			}
+		}
 
-			// if histogram target is met then simply set the left to be the tight bin unless it is already right
-			else{
-				left[*p1] = (p + 1 < right[*p1]) ? p + 1 : right[*p1];
-				p = left[*p1];
-				*p2 = p;
+		// eval h1 and init left[], right[], and lim[]
+		IP_histogram(I2, ch, h1, MXGRAY, hmin, hmax);
+		R = Hsum = 0;
+		for(int i=0; i<MXGRAY; i++) {
+			left[i] = indx[i] = R;	// left end of interval
+			lim [i] = h2[R] - Hsum;	// leftover on left
+			Hsum   += h1[i];	// cum. interval value
+
+			// widen interval if Hsum>h2[R]
+			while(Hsum>h2[R] && R<MaxGray) {
+				Hsum -= h2[R];
+				R++;
 			}
+			right[i] = R;		// right end of interval
+		}
 
-			// fill output histogram and assigh value to output image
-			histogram_input[p]++;
-			*p1++;
-			*p2++;
+		// clear h1 and reuse it below
+		for(int i=0; i<MXGRAY; i++) h1[i] = 0;
+
+		IP_getChannel(I2, ch, p, t);
+		for(endd=p+total; p<endd; p++) {
+			int i = indx[*p];
+			if(i == left[*p]) {
+				if(lim[*p]-- <= 0)
+					i=indx[*p] = MIN(i+1,MaxGray);
+				*p = i;
+			} else if(i < right[*p]) {
+				if(h1[i] < h2[i]) *p = i;
+				else *p=indx[*p] = MIN(i+1,MaxGray);
+			} else	*p = i;
+			h1[i]++;
 		}
 	}
+	delete [] lut;
+	delete [] dd1;
 }

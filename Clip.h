@@ -16,11 +16,13 @@ class Clip : public ImageFilter {
 	Q_OBJECT
 
 public:
-	Clip				(QWidget *parent = 0);	// constructor
-	QGroupBox*	controlPanel	();			// create control panel
-	bool		applyFilter	(ImagePtr, ImagePtr);	// apply filter to input
-	void		reset		();			// reset parameters
+	Clip				(QWidget *parent = 0);		// constructor
+	QGroupBox*	controlPanel	();				// create control panel
+	bool		applyFilter	(ImagePtr, bool, ImagePtr);	// apply filter to input
+	void		reset		();				// reset parameters
 	void		clip		(ImagePtr, int, int, ImagePtr);
+	void		initShader();
+	void		gpuProgram(int pass);	// use GPU program to apply filter
 
 protected slots:
 	void changeThr1	(int);
@@ -28,9 +30,9 @@ protected slots:
 
 private:
 	// widgets
-	QSlider		*m_slider [2];	// clip sliders
-	QSpinBox	*m_spinBox[2];	// clip spin boxes
-	QGroupBox	*m_ctrlGrp;	// groupbox for panel
+	QSlider*	m_slider [2];	// clip sliders
+	QSpinBox*	m_spinBox[2];	// clip spin boxes
+	QGroupBox*	m_ctrlGrp;	// groupbox for panel
 };
 
 #endif	// CLIP_H
