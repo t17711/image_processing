@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cstdarg>
 #include <cassert>
+#include <ctime>
 #include <vector>
 #include <map>
 #include <algorithm>
@@ -29,11 +30,13 @@
 #include "IPtoUI.h"
 #include "ImageFilter.h"
 #include "qcustomplot.h"
-
-#include "QGLDisplay.h"
+#include "GLWidget.h"
 
 #define MAXFILTERS	50
-
+enum {
+	DUMMY, THRESHOLD, CLIP, QUANTIZE, GAMMA, CONTRAST, HISTOSTRETCH, HISTOMATCH,
+	ERRDIFFUSION, BLUR, SHARPEN, MEDIAN, CONVOLVE
+};
 using namespace IP;
 
 class MainWindow : public QMainWindow {
@@ -44,12 +47,28 @@ public:
 	MainWindow	(QWidget *parent = 0);
 	ImagePtr	imageSrc	() const;
 	ImagePtr	imageDst	() const;
-	
-	// for gl
-	QImage	imageDisp() const;
-
-	QCustomPlot*	histogram()	{return m_histogram;}
+	void		setImageDst	(ImagePtr I) {
+		if(m_radioMode[1]->isChecked())
+			IP_castImage(I, BW_IMAGE, I);
+		m_imageDst = I;
+	}
+	QCustomPlot*	histogram	()      
+		{return m_histogram;}
+	GLWidget*	glw		()      
+		{return m_glw;}
 	void		preview		();
+	bool		gpuFlag		()      
+		{ return m_checkboxGPU->checkState() ==  Qt::Checked; }
+	bool		timeFlag	()	
+		{ return m_checkboxTime->checkState() ==  Qt::Checked; }
+	void		gpuProgram      (int pass) 
+		{ m_imageFilter[m_code]->gpuProgram(pass); }
+	int		gpuPasses () 
+		{ return m_imageFilter[m_code]->gpuPasses(); }
+	ImageFilter*	imageFilter(int i)	
+		{ return m_imageFilter[i]; }
+	bool		isInput		()	
+		{ return m_radioDisplay[0]->isChecked();}
 
 public slots:
 	void		open		();
@@ -63,16 +82,18 @@ public slots:
 	void		time		();
 	void		execute		(QAction*);
 
+
 protected slots:
 	void		setHisto	(int);
 	void		setTime		(int);
+	void		setGPU		(int);
 
 protected:
 	void		createActions	();
 	void		createMenus	();
 	void		createWidgets	();
 	QGroupBox*	createGroupPanel();
-	QGroupBox*	createGroupDisplay  ();
+	QFrame*		createGroupDisplay  ();
 	QGroupBox*	createDisplayButtons();
 	QGroupBox*	createModeButtons   ();
 	QGroupBox*	createOptionButtons ();
@@ -83,8 +104,12 @@ protected:
 
 
 private:
+	// menus
 	QMenu*			m_menuFile;
 	QMenu*			m_menuPtOps;
+	QMenu*			m_menuNbrOps;
+
+	// point ops actions
 	QAction*		m_actionOpen;
 	QAction*		m_actionSave;
 	QAction*		m_actionQuit;
@@ -96,6 +121,14 @@ private:
 	QAction*		m_actionHistoStretch;
 	QAction*		m_actionHistoMatch  ;
 
+	// neighborhood ops actions
+	QAction*		m_actionErrDiffusion;
+	QAction*		m_actionBlur	    ;
+	QAction*		m_actionSharpen	    ;
+	QAction*		m_actionMedian	    ;
+	QAction*		m_actionConvolve    ;
+
+
 	// homework objects
 	ImageFilter*		m_imageFilter[MAXFILTERS];
 
@@ -104,15 +137,7 @@ private:
 	QStackedWidget*		m_stackWidgetPanels;	// stacked widget for control panels
 
 	// widgets for image display groupbox
-	//QStackedWidget*		m_stackWidgetImages;	// stacked widget for input/output images
-	
-	
-	/********************************************************/
-	//QGLDisplay* m_image_display; // glsl image display
-	QGLDisplay* m_imageGL; // glsl image display
-	QImage  m_imageCurr;
-	/*******************************************************/
-
+	QFrame*			m_glwFrame;		// pointer to frame that holds glwidget
 	QRadioButton*		m_radioDisplay[2];	// radio buttons for input/output
 	QRadioButton*		m_radioMode   [2];	// radio buttons for RGB/Gray modes
 	QCheckBox*		m_checkboxHisto;	// checkbox: histogram display
@@ -137,6 +162,7 @@ private:
 	double			m_histoXmax[4];		// xmax for all histogram channels
 	double			m_histoYmin[4];		// ymin for all histogram channels
 	double			m_histoYmax[4];		// ymax for all histogram channels
+	GLWidget	       *m_glw;
 };
 
 
@@ -165,9 +191,4 @@ MainWindow::imageDst() const
 	return m_imageDst;
 }
 
-inline QImage
-MainWindow::imageDisp() const
-{
-	return m_imageCurr;
-}
 #endif // MAINWINDOW_H

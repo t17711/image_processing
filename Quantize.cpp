@@ -12,7 +12,7 @@
 #include "hw1/HW_quantize.cpp"
 
 extern MainWindow *g_mainWindowP;
-
+enum { LEVELS, DITHER, SAMPLER };
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Quantize::Quantize:
 //
@@ -81,7 +81,7 @@ Quantize::controlPanel()
 // Return 1 for success, 0 for failure.
 //
 bool
-Quantize::applyFilter(ImagePtr I1, ImagePtr I2)
+Quantize::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 {
 	// error checking
 	if(I1.isNull()) return 0;
@@ -98,8 +98,11 @@ Quantize::applyFilter(ImagePtr I1, ImagePtr I2)
 		dither = 1;
 
 	// apply filter
-	quantize(I1, levels, dither, I2);
-
+	if(!(gpuFlag && m_shaderFlag))
+		// apply CPU based filter
+		quantize(I1, levels, dither, I2);
+	else
+		g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
 	return 1;
 }
 
@@ -183,4 +186,50 @@ Quantize::reset()
 
 	// apply filter and display output
 	g_mainWindowP->preview();
+}
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Quantize::initShader:
+//
+// init shader program and parameters.
+//
+void
+Quantize::initShader() 
+{
+
+	m_nPasses = 1;
+	// initialize GL function resolution for current context
+	initializeGLFunctions();
+
+	UniformMap uniforms;
+
+	// init uniform hash table based on uniform variable names and location IDs
+	uniforms["u_Levels" ] = LEVELS;
+	uniforms["u_Dither" ] = DITHER;
+	uniforms["u_Sampler"] = SAMPLER;
+
+	// compile shader, bind attribute vars, link shader, and initialize uniform var table
+	g_mainWindowP->glw()->initShader(m_program[PASS1],
+					 QString(":/hw1/vshader_quantize.glsl"),
+					 QString(":/hw1/fshader_quantize.glsl"),
+					 uniforms,
+					 m_uniform[PASS1]);
+	m_shaderFlag = true;
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Quantize::gpuProgram:
+//
+// Active gpu program
+//
+void
+Quantize::gpuProgram(int pass)
+{
+	glUseProgram(m_program[pass].programId());
+	glUniform1f (m_uniform[pass][LEVELS], m_slider->value());
+	glUniform1i (m_uniform[pass][DITHER], m_checkBox->checkState() == Qt::Checked);
+	glUniform1i (m_uniform[pass][SAMPLER], 0);
 }

@@ -12,6 +12,7 @@
 #include "hw1/HW_histoStretch.cpp"
 
 extern MainWindow *g_mainWindowP;
+enum { THR1, THR2, SAMPLER };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // HistoStretch::HistoStretch:
@@ -105,7 +106,7 @@ HistoStretch::controlPanel()
 // Return 1 for success, 0 for failure.
 //
 bool
-HistoStretch::applyFilter(ImagePtr I1, ImagePtr I2)
+HistoStretch::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 {
 	// error checking
 	if(I1.isNull()) return 0;
@@ -151,7 +152,11 @@ HistoStretch::applyFilter(ImagePtr I1, ImagePtr I2)
 	}
 
 	// apply filter
-	histoStretch(I1, t1, t2, I2);
+	if(!(gpuFlag && m_shaderFlag))
+		// apply CPU based filter
+		histoStretch(I1, t1, t2, I2);
+	else
+		g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
 
 	return 1;
 }
@@ -307,4 +312,48 @@ HistoStretch::reset()
 
 	// apply filter to source image and display result
 	g_mainWindowP->preview();
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// HistoStretch::initShader:
+//
+// init shader program and parameters.
+//
+void
+HistoStretch::initShader() 
+{
+	m_nPasses = 1;
+	// initialize GL function resolution for current context
+	initializeGLFunctions();
+
+	UniformMap uniforms;
+
+	// init uniform hash table based on uniform variable names and location IDs
+	uniforms["u_Thr1"] = THR1;
+	uniforms["u_Thr2"] = THR2;
+	uniforms["u_Sampler"] = SAMPLER;
+
+	// compile shader, bind attribute vars, link shader, and initialize uniform var table
+	g_mainWindowP->glw()->initShader(m_program[PASS1],
+					 QString(":/hw1/vshader_histoStretch.glsl"),
+					 QString(":/hw1/fshader_histoStretch.glsl"),
+					 uniforms,
+					 m_uniform[PASS1]);
+	m_shaderFlag = true;
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// HistoStretch::gpuProgram:
+//
+// Active gpu program
+//
+void
+HistoStretch::gpuProgram(int pass) 
+{
+	glUseProgram(m_program[pass].programId());
+	glUniform1f (m_uniform[pass][THR1], (GLfloat) m_slider[0]->value()/255.0f);
+	glUniform1f (m_uniform[pass][THR2], (GLfloat) m_slider[1]->value()/255.0f);
+	glUniform1i (m_uniform[pass][SAMPLER], 0);
 }

@@ -79,7 +79,7 @@ HistoMatch::controlPanel()
 // Return 1 for success, 0 for failure.
 //
 bool
-HistoMatch::applyFilter(ImagePtr I1, ImagePtr I2)
+HistoMatch::applyFilter(ImagePtr I1, bool /*gpuFlag*/, ImagePtr I2)
 {
 	// error checking
 	if(I1.isNull()) return 0;
@@ -187,4 +187,28 @@ HistoMatch::reset()
 
 	// apply filter to source image and display result
 	g_mainWindowP->preview();
+}
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// HistoMatch::initShader:
+//
+// init shader program and parameters.
+//
+void
+HistoMatch::initShader() {
+
+	m_shaderFlag = false;
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// HistoMatch::gpuProgram:
+//
+// Active gpu program
+//
+void
+HistoMatch::gpuProgram(int) {
+
 }
