@@ -9,10 +9,10 @@
 
 #include "MainWindow.h"
 #include "Median.h"
-//#include "hw2/HW_median.cpp"
+#include "hw2/HW_median.cpp"
 
 extern MainWindow *g_mainWindowP;
-enum { WSIZE, STEPX, STEPY, SAMPLER };
+enum { WSIZE, WSTEP, HSIZE, HSTEP, SAMPLER };
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Median::Median:
 //
@@ -141,7 +141,7 @@ Median::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 void
 Median::median(ImagePtr I1, int sz, ImagePtr I2)
 {
-//	HW_median(I1, sz, I2);
+	HW_median(I1, sz, sz, 0, I2);
 }
 
 
@@ -212,8 +212,27 @@ Median::reset()
 void
 Median::initShader() 
 {
+	m_nPasses = 1;
+	// initialize GL function resolution for current context
+	initializeGLFunctions();
 
-	m_shaderFlag = false;
+	UniformMap uniforms;
+
+	// init uniform hash table based on uniform variable names and location IDs
+	uniforms["u_Wsize"] = WSIZE;
+	uniforms["u_WStep"] = WSTEP;
+	uniforms["u_Hsize"] = HSIZE;
+	uniforms["u_HStep"] = HSTEP;
+	uniforms["u_Sampler"] = SAMPLER;
+
+	// compile shader, bind attribute vars, link shader, and initialize uniform var table
+	g_mainWindowP->glw()->initShader(m_program[PASS1],
+		QString(":/hw2/vshader_median.glsl"),
+		QString(":/hw2/fshader_median.glsl"),
+		uniforms,
+		m_uniform[PASS1]);
+	uniforms.clear();
+	m_shaderFlag = true;
 }
 
 
@@ -225,5 +244,15 @@ Median::initShader()
 void
 Median::gpuProgram(int pass) 
 {
-
+	int w_size = m_slider[0]->value();
+	int h_size = m_slider[0]->value();
+	int m_iter = m_slider[1]->value();
+	if (w_size % 2 == 0) ++w_size;
+	if (h_size % 2 == 0) ++h_size;
+	glUseProgram(m_program[pass].programId());
+	glUniform1i(m_uniform[pass][WSIZE], w_size);
+	glUniform1f(m_uniform[pass][WSTEP], (GLfloat) 1.0f / m_width);
+	glUniform1f(m_uniform[pass][HSTEP], (GLfloat) 1.0f / m_height);
+	glUniform1i(m_uniform[pass][SAMPLER], 0);
+	glUniform1i(m_uniform[pass][HSIZE], h_size);
 }
