@@ -8,29 +8,29 @@
 // ======================================================================
 
 #include "MainWindow.h"
-#include "Blur.h"
-#include "hw2/HW_blur.cpp"
+#include "Blur2.h"
+#include "hw2/HW_blur2.cpp"
 
 extern MainWindow *g_mainWindowP;
-enum { WSIZE, HSIZE, STEP, SAMPLER };
+enum { WSIZE, HSIZE, WSTEP,HSTEP,SAMPLER };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Blur::Blur:
+// Blur_1P::Blur:
 //
 // Constructor.
 //
-Blur::Blur(QWidget *parent) : ImageFilter(parent)
+Blur_1P::Blur_1P(QWidget *parent) : ImageFilter(parent)
 {}
 
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Blur::controlPanel:
+// Blur_1P::controlPanel:
 //
 // Create group box for control panel.
 //
 QGroupBox*
-Blur::controlPanel()
+Blur_1P::controlPanel()
 {
 	// init group box
 	m_ctrlGrp = new QGroupBox("Blur");
@@ -91,14 +91,14 @@ Blur::controlPanel()
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Blur::applyFilter:
+// Blur_1P::applyFilter:
 //
 // Run filter on the image, transforming I1 to I2.
 // Overrides ImageFilter::applyFilter().
 // Return 1 for success, 0 for failure.
 //
 bool
-Blur::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
+Blur_1P::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 {
 	// error checking
 	if(I1.isNull()) return 0;
@@ -119,27 +119,27 @@ Blur::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Blur::blur:
+// Blur_1P::blur:
 //
 // Blur image I1 with a box filter (unweighted averaging).
 // The filter has width w and height h.
 // Output is in I2.
 //
 void
-Blur::blur(ImagePtr I1, int w, int h, ImagePtr I2)
+Blur_1P::blur(ImagePtr I1, int w, int h, ImagePtr I2)
 {
-	HW_blur(I1, w, h, I2);
+	HW_blur2(I1, w, h, I2);
 }
 
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Blur::changeFilterW:
+// Blur_1P::changeFilterW:
 //
 // Slot to process change in filter width caused by moving the slider.
 //
 void
-Blur::changeFilterW(int value)
+Blur_1P::changeFilterW(int value)
 {
 	// set value of m_slider[0] and tie it to m_slider[1] if necessary
 	for(int i=0; i<2; i++) {
@@ -161,12 +161,12 @@ Blur::changeFilterW(int value)
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Blur::changeFilterH:
+// Blur_1P::changeFilterH:
 //
 // Slot to process change in filter height caused by moving the slider.
 //
 void
-Blur::changeFilterH(int value)
+Blur_1P::changeFilterH(int value)
 {
 	// set value of m_slider[1] and tie it to m_slider[0] if necessary
 	for(int i=1; i>=0; i--) {
@@ -194,7 +194,7 @@ Blur::changeFilterH(int value)
 // Set both sliders to same (min) value.
 //
 void
-Blur::setLock(int state)
+Blur_1P::setLock(int state)
 {
 	if(state == Qt::Checked) {
 		int val = MIN(m_slider[0]->value(), m_slider[1]->value());
@@ -212,12 +212,12 @@ Blur::setLock(int state)
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Blur::reset:
+// Blur_1P::reset:
 //
 // Reset parameters.
 //
 void
-Blur::reset()
+Blur_1P::reset()
 {
 	m_slider[0]->setValue(3);
 	m_slider[1]->setValue(3);
@@ -229,14 +229,14 @@ Blur::reset()
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Blur::initShader:
+// Blur_1P::initShader:
 //
 // init shader program and parameters.
 //
 void
-Blur::initShader() 
+Blur_1P::initShader() 
 {
-	m_nPasses = 2;
+	m_nPasses = 1;
 	// initialize GL function resolution for current context
 	initializeGLFunctions();
 
@@ -244,57 +244,39 @@ Blur::initShader()
 
 	// init uniform hash table based on uniform variable names and location IDs
 	uniforms["u_Wsize"  ] = WSIZE;
-	uniforms["u_Step"   ] = STEP;
+	uniforms["u_WStep"   ] = WSTEP;
+	uniforms["u_Hsize"] = HSIZE;
+	uniforms["u_HStep"] = HSTEP;
 	uniforms["u_Sampler"] = SAMPLER;
 
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
 	g_mainWindowP->glw()->initShader(m_program[PASS1],
-					 QString(":/hw2/vshader_blur1.glsl"),
-					 QString(":/hw2/fshader_blur1.glsl"),
+					 QString(":/hw2/vshader_blur.glsl"),
+					 QString(":/hw2/fshader_blur.glsl"),
 					 uniforms,
 					 m_uniform[PASS1]);
 	uniforms.clear();
-
-
-	uniforms["u_Hsize"  ] = HSIZE;
-	uniforms["u_Step"   ] = STEP;
-	uniforms["u_Sampler"] = SAMPLER;
-
-	// compile shader, bind attribute vars, link shader, and initialize uniform var table
-	g_mainWindowP->glw()->initShader(m_program[PASS2],
-					 QString(":/hw2/vshader_blur2.glsl"),
-					 QString(":/hw2/fshader_blur2.glsl"),
-					 uniforms,
-					 m_uniform[PASS2]);
 
 	m_shaderFlag = true;
 }
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Blur::gpuProgram:
+// Blur_1P::gpuProgram:
 //
 // Active Blur gpu program
 //
 void
-Blur::gpuProgram(int pass) 
+Blur_1P::gpuProgram(int pass) 
 {
 	int w_size = m_slider[0]->value();
 	int h_size = m_slider[1]->value();
 	if(w_size % 2 == 0) ++w_size;
 	if(h_size % 2 == 0) ++h_size;
-	switch(pass) {
-		case PASS1:
-			glUseProgram(m_program[PASS1].programId());
-			glUniform1i (m_uniform[PASS1][WSIZE], w_size);
-			glUniform1f (m_uniform[PASS1][STEP],  (GLfloat) 1.0f / m_width);
-			glUniform1i (m_uniform[PASS1][SAMPLER], 0);
-			break;
-		case PASS2:
-			glUseProgram(m_program[PASS2].programId());
-			glUniform1i (m_uniform[PASS2][HSIZE], h_size);
-			glUniform1f (m_uniform[PASS2][STEP],  (GLfloat) 1.0f / m_height);
-			glUniform1i (m_uniform[PASS2][SAMPLER], 0);
-			break;
-	}
+	glUseProgram(m_program[pass].programId());
+	glUniform1i (m_uniform[pass][WSIZE], w_size);
+	glUniform1f (m_uniform[pass][WSTEP], (GLfloat) 1.0f / m_width);
+	glUniform1f(m_uniform[pass][HSTEP], (GLfloat) 1.0f / m_height);
+	glUniform1i (m_uniform[pass][SAMPLER], 0);
+	glUniform1i (m_uniform[pass][HSIZE], h_size);
 }
