@@ -1,6 +1,6 @@
 #version 330
 
-#define MXGRAY 256
+#define MXGRAY 255.0
 in	vec2	  v_TexCoord;	// varying variable for passing texture coordinate from vertex shader
 
 uniform int       u_Wsize;	// blur width value
@@ -8,6 +8,7 @@ uniform int       u_Hsize;	// blur height value
 uniform float	  u_WStep;
 uniform float	  u_HStep;
 uniform	sampler2D u_Sampler;	// uniform variable for the texture image
+ivec3 hist[256];
 
 void main() {
 	vec3 tmp = vec3(0.0);
@@ -21,41 +22,40 @@ void main() {
 	int size = u_Wsize*u_Hsize; // size of buffer
 	int med = ((size - 1)/ 2) +1; //median of 3 is 3/2 +1  = 1+1 =2
 	
-	int hist_r[MXGRAY];
-	int hist_g[MXGRAY];
-	int hist_b[MXGRAY];
+	for(int i=0;i<256;i++){
+	hist[i] = ivec3(0,0,0);
+	}
+	
 	
 	// create histogram
-	for(int i=-w1; i<=w1; ++i)
-			for(int j=-w2; j<=w2; ++j)
-			{
-			tmp = texture2D(u_Sampler, vec2(tc.x + i*u_WStep, tc.y + j*u_HStep)).rgb;
-			r = int (tmp.r * MXGRAY);
-			g =	int (tmp.g * MXGRAY);
-			b =	int (tmp.b * MXGRAY);
+	for(int i=-w1; i<=w1; i++)
+			for(int j=-w2; j<=w2; j++){
+				tmp = texture2D(u_Sampler, vec2(tc.x + i*u_WStep, tc.y + j*u_HStep)).rgb;
+				r = int (tmp.r * MXGRAY);
+				g =	int (tmp.g * MXGRAY);
+				b =	int (tmp.b * MXGRAY);
 
-			hist_r[r]++;
-			hist_g[g]++;
-			hist_b[b]++;
-			
+				hist[r].r+=1;
+				hist[g].g+=1;
+				hist[b].b+=1;		
 			}
 		
 	int m = 0;
 	int k = 0;
-	for(k = 0; m<med && k<MXGRAY; ++k){
-		m+= hist_r[k];
+	for(k = 0; m<med && k<256; k++){
+		m+= hist[k].r;
 	}
 	tmp.r = float(k/MXGRAY);
 	
 	m = 0;
-	for(k = 0; m<med && k<MXGRAY; ++k){
-		m+= hist_g[k];
+	for(k = 0; m<med && k<256; k++){
+		m+= hist[k].g;
 	}
 	tmp.g= float(k/MXGRAY);
 	
 	m = 0;
-	for(k = 0; m<med && k<MXGRAY; ++k){
-		m+= hist_b[k];
+	for(k = 0; m<med && k<256; ++k){
+		m+= hist[k].b;
 	}
 	tmp.b= float(k/MXGRAY);
 	
