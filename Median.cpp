@@ -245,8 +245,7 @@ void
 Median::gpuProgram(int pass) 
 {
 	int w_size = m_slider[0]->value();
-	int h_size = m_slider[0]->value();
-	int m_iter = m_slider[1]->value();
+	int h_size = w_size;
 	if (w_size % 2 == 0) ++w_size;
 	if (h_size % 2 == 0) ++h_size;
 	glUseProgram(m_program[pass].programId());
