@@ -37,13 +37,31 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Blur.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Blur2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Blur_weighed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Clip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Contrast.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Convolve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Dummy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrDiffusion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GLWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Gamma.cpp">
@@ -61,10 +79,13 @@
     <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="QGLDisplay.cpp">
+    <ClCompile Include="Median.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Quantize.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sharpen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Threshold.cpp">
@@ -78,15 +99,33 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="Blur.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Blur2.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Blur_weighed.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="Clip.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Contrast.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="Convolve.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="Dummy.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="ErrDiffusion.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="GLWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <CustomBuild Include="Gamma.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -102,10 +141,13 @@
     <CustomBuild Include="MainWindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="QGLDisplay.h">
+    <CustomBuild Include="Median.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Quantize.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Sharpen.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Threshold.h">
@@ -116,37 +158,106 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="moc\moc_Clip.cpp">
+    <ClCompile Include="debug\.moc\moc_Blur.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="moc\moc_Contrast.cpp">
+    <ClCompile Include="release\.moc\moc_Blur.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="moc\moc_Dummy.cpp">
+    <ClCompile Include="debug\.moc\moc_Blur2.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="moc\moc_Gamma.cpp">
+    <ClCompile Include="release\.moc\moc_Blur2.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="moc\moc_HistoMatch.cpp">
+    <ClCompile Include="debug\.moc\moc_Blur_weighed.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="moc\moc_HistoStretch.cpp">
+    <ClCompile Include="release\.moc\moc_Blur_weighed.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="moc\moc_MainWindow.cpp">
+    <ClCompile Include="debug\.moc\moc_Clip.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="moc\moc_QGLDisplay.cpp">
+    <ClCompile Include="release\.moc\moc_Clip.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="moc\moc_Quantize.cpp">
+    <ClCompile Include="debug\.moc\moc_Contrast.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="moc\moc_Threshold.cpp">
+    <ClCompile Include="release\.moc\moc_Contrast.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="moc\moc_qcustomplot.cpp">
+    <ClCompile Include="debug\.moc\moc_Convolve.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_Convolve.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_Dummy.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_Dummy.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_ErrDiffusion.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_ErrDiffusion.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_Gamma.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_Gamma.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_HistoMatch.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_HistoMatch.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_HistoStretch.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_HistoStretch.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_MainWindow.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_MainWindow.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_Median.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_Median.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_Quantize.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_Quantize.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_Sharpen.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_Sharpen.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_Threshold.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_Threshold.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_qcustomplot.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_qcustomplot.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="debug\qrc_qip.cpp">
@@ -157,22 +268,85 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ckr.jpg">
+    <None Include="hw2\fshader_blur.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="fshader0.glsl">
+    <None Include="hw2\fshader_blur1.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="fshader1.glsl">
+    <None Include="hw2\fshader_blur2.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\fshader_blur_weighed.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\fshader_clip.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\fshader_contrast.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\fshader_gamma.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\fshader_histoStretch.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\fshader_median.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="fshader_passthrough.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\fshader_quantize.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\fshader_sharpen.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\fshader_threshold.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <CustomBuild Include="qip.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <None Include="vshader0.glsl">
+    <None Include="hw2\vshader_blur.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="vshader1.glsl">
+    <None Include="hw2\vshader_blur1.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\vshader_blur2.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\vshader_blur_weighed.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\vshader_clip.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\vshader_contrast.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\vshader_gamma.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\vshader_histoStretch.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\vshader_median.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="vshader_passthrough.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\vshader_quantize.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\vshader_sharpen.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\vshader_threshold.glsl">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
