@@ -297,6 +297,7 @@ GLWidget::initShaders()
 	g_mainWindowP->imageFilter(ERRDIFFUSION)->initShader();
 	g_mainWindowP->imageFilter(BLUR)->initShader();
 	g_mainWindowP->imageFilter(BLUR2)->initShader();
+	g_mainWindowP->imageFilter(BLUR_W)->initShader();
 	g_mainWindowP->imageFilter(SHARPEN)->initShader();
 	g_mainWindowP->imageFilter(MEDIAN)->initShader();
 	g_mainWindowP->imageFilter(CONVOLVE)->initShader();

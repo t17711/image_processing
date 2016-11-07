@@ -7,6 +7,7 @@ uniform float	  u_Step;
 uniform	sampler2D u_Sampler;	// uniform variable for the texture image
 
 
+
 void main() {
 	
 	vec3 avg = vec3(0.0);

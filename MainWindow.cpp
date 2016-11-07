@@ -19,6 +19,7 @@
 #include "ErrDiffusion.h"
 #include "Blur.h"
 #include "Blur2.h"
+#include "Blur_weighed.h"
 #include "Sharpen.h"
 #include "Median.h"
 #include "Convolve.h"
@@ -134,6 +135,9 @@ MainWindow::createActions()
 	m_actionBlur_1pass = new QAction("Blur 1 pass", this);
 	m_actionBlur_1pass->setData(BLUR2);
 
+	m_actionBlur_weighed = new QAction("Blur weighed", this);
+	m_actionBlur_weighed->setData(BLUR_W);
+
 	m_actionSharpen = new QAction("&Sharpen", this);
 	m_actionSharpen->setShortcut(tr("Ctrl+S"));
 	m_actionSharpen->setData(SHARPEN);
@@ -184,6 +188,8 @@ MainWindow::createMenus()
 	m_menuNbrOps->addAction(m_actionErrDiffusion);
 	m_menuNbrOps->addAction(m_actionBlur	   );
 	m_menuNbrOps->addAction(m_actionBlur_1pass);
+	m_menuNbrOps->addAction(m_actionBlur_weighed);
+
 	m_menuNbrOps->addAction(m_actionSharpen	   );
 
 	m_menuNbrOps->addAction(m_actionMedian	   );
@@ -246,6 +252,7 @@ MainWindow::createGroupPanel()
 	m_imageFilter[ERRDIFFUSION]=new ErrDiffusion;
 	m_imageFilter[BLUR	] = new Blur;
 	m_imageFilter[BLUR2	] = new Blur_1P;
+	m_imageFilter[BLUR_W	] = new Blur_weighed;
 
 	m_imageFilter[SHARPEN	] = new Sharpen;
 	m_imageFilter[MEDIAN	] = new Median;
@@ -267,6 +274,9 @@ MainWindow::createGroupPanel()
 	m_stackWidgetPanels->addWidget(m_imageFilter[ERRDIFFUSION]->controlPanel());
 	m_stackWidgetPanels->addWidget(m_imageFilter[BLUR	 ]->controlPanel());
 	m_stackWidgetPanels->addWidget(m_imageFilter[BLUR2	 ]->controlPanel());
+	m_stackWidgetPanels->addWidget(m_imageFilter[BLUR_W	 ]->controlPanel());
+
+
 	m_stackWidgetPanels->addWidget(m_imageFilter[SHARPEN	 ]->controlPanel());
 	m_stackWidgetPanels->addWidget(m_imageFilter[MEDIAN	 ]->controlPanel());
 	m_stackWidgetPanels->addWidget(m_imageFilter[CONVOLVE	 ]->controlPanel());
