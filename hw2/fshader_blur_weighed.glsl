@@ -7,8 +7,7 @@ uniform int       u_Hsize;	// blur height value
 uniform float	  u_WStep;
 uniform float	  u_HStep;
 uniform	sampler2D u_Sampler;	// uniform variable for the texture image
-uniform	float[9] u_Weight;	// uniform variable for the texture image
-
+uniform	float[1000] u_Weight; // uniform variable for the texture image
 
 void main() {
 	vec3 avg = vec3(0.0);
@@ -16,12 +15,17 @@ void main() {
 	vec3 wt = vec3(0.0);
 	int  w2  = u_Wsize / 2;
 	int  h2  = u_Hsize / 2;
-	 
+
+	int sz = (u_Wsize*u_Hsize);
+	float wt_hstep = 1.0/u_Hsize;
+	float wt_wstep = 1.0/u_Wsize;
+
 	for(int i=-h2, ii =0; i<=h2; ++i){
-		for(int j=-w2; j<=w2; ++j,++ii)
+		for(int j=-w2; j<=w2; ++j,++ii)	
 			{
-			if (ii==9) ii = 0;
+			if (ii==sz) ii = 0;
 			wt = vec3(u_Weight[ii],u_Weight[ii],u_Weight[ii]);
+			
 			avg += (texture2D(u_Sampler, vec2(tc.x + i*u_WStep, tc.y + j*u_HStep)).rgb*wt);
 			
 			}

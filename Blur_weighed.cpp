@@ -68,6 +68,10 @@ Blur_weighed::controlPanel()
 		layout->addWidget(m_spinBox[i], i, 2);
 	}
 
+	m_table = new QTableView(m_ctrlGrp);
+	layout->addWidget(m_table, 3, 0, 4, 3, Qt::AlignCenter);
+	
+
 	// create checkbox
 	m_checkBox = new QCheckBox("Lock filter dimensions");
 	m_checkBox->setCheckState(Qt::Checked);
@@ -154,6 +158,10 @@ Blur_weighed::changeFilterW(int value)
 		if (m_checkBox->checkState() != Qt::Checked) break;
 	}
 
+	int w = m_slider[0]->value();	// filter width
+	int h = m_slider[1]->value();	// filter height
+	
+	m_table->setRowHeight(w, h);
 	// apply filter to source image and display result
 	g_mainWindowP->preview();
 }
@@ -180,6 +188,12 @@ Blur_weighed::changeFilterH(int value)
 		// don't tie slider values if lock checkbox is not checked
 		if (m_checkBox->checkState() != Qt::Checked) break;
 	}
+
+
+	int w = m_slider[0]->value();	// filter width
+	int h = m_slider[1]->value();	// filter height
+
+	m_table->setRowHeight(w, h);
 
 	// apply filter to source image and display result
 	g_mainWindowP->preview();
@@ -274,6 +288,7 @@ Blur_weighed::gpuProgram(int pass)
 	int h_size = m_slider[1]->value();
 	if (w_size % 2 == 0) ++w_size;
 	if (h_size % 2 == 0) ++h_size;
+	
 	glUseProgram(m_program[pass].programId());
 	glUniform1i(m_uniform[pass][WSIZE], w_size);
 	glUniform1f(m_uniform[pass][WSTEP], (GLfloat) 1.0f / m_width);
@@ -281,13 +296,14 @@ Blur_weighed::gpuProgram(int pass)
 	glUniform1i(m_uniform[pass][SAMPLER], 0);
 	glUniform1i(m_uniform[pass][HSIZE], h_size);
 
-	
+
+
 	int sz = w_size*h_size;
-	
+	if (sz > 1000) sz = 1000; // max 1000
+	float wt[1000]; // 1000 in shader
+	for (int i = 0; i < sz; ++i) wt[i] = 1.0f/sz;
+	for (int i = sz; i < 1000; ++i) wt[i] = 0;
 
-	GLfloat wt[9] = { 0.1f, 0.2f, 0.05f, 0.03f, 0.07f, 0.04f, 0.1f, 0.3f, 0.1f };	
-	glUniform1fv(m_uniform[pass][WEIGHT], 9, wt);
-	
-
+	glUniform1fv(m_uniform[pass][WEIGHT],1000, wt);
 
 }
