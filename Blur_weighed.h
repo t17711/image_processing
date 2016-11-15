@@ -34,7 +34,6 @@ private:
 	QSlider*	m_slider[2];	// Blur sliders
 	QSpinBox*	m_spinBox[2];	// Blur spin boxes
 	QCheckBox*	m_checkBox;	// Blur check box
-	QTableView* m_table;
 	QGroupBox*	m_ctrlGrp;	// groupbox for panel
 	int		m_width;	// input image width
 	int		m_height;	// input image height
