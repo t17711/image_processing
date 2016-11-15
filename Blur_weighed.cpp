@@ -68,10 +68,6 @@ Blur_weighed::controlPanel()
 		layout->addWidget(m_spinBox[i], i, 2);
 	}
 
-	m_table = new QTableView(m_ctrlGrp);
-	layout->addWidget(m_table, 3, 0, 4, 3, Qt::AlignCenter);
-	
-
 	// create checkbox
 	m_checkBox = new QCheckBox("Lock filter dimensions");
 	m_checkBox->setCheckState(Qt::Checked);
@@ -158,10 +154,7 @@ Blur_weighed::changeFilterW(int value)
 		if (m_checkBox->checkState() != Qt::Checked) break;
 	}
 
-	int w = m_slider[0]->value();	// filter width
-	int h = m_slider[1]->value();	// filter height
 	
-	m_table->setRowHeight(w, h);
 	// apply filter to source image and display result
 	g_mainWindowP->preview();
 }
@@ -190,10 +183,6 @@ Blur_weighed::changeFilterH(int value)
 	}
 
 
-	int w = m_slider[0]->value();	// filter width
-	int h = m_slider[1]->value();	// filter height
-
-	m_table->setRowHeight(w, h);
 
 	// apply filter to source image and display result
 	g_mainWindowP->preview();
@@ -297,10 +286,11 @@ Blur_weighed::gpuProgram(int pass)
 	glUniform1i(m_uniform[pass][HSIZE], h_size);
 
 
-
 	int sz = w_size*h_size;
 	if (sz > 1000) sz = 1000; // max 1000
 	float wt[1000]; // 1000 in shader
+
+	// get uniform weight
 	for (int i = 0; i < sz; ++i) wt[i] = 1.0f/sz;
 	for (int i = sz; i < 1000; ++i) wt[i] = 0;
 

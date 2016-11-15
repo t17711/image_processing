@@ -95,9 +95,6 @@ get_med(ChannelPtr<uchar> p2, std::deque <uchar* > buffer, int xsz, int ysz, int
 
 void
 HW_median(ImagePtr I1, int xsz, int ysz, int avg, ImagePtr I2){
-	/*clock_t t;
-	t = clock();*/
-
 	IP_copyImageHeader(I1, I2);  // copys width height and other properties from i1 to i2
 
 	int w = I1->width();  // input image
