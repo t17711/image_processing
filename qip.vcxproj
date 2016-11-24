@@ -450,6 +450,7 @@
     <None Include="hw2\fshader_blur_weighed.glsl" />
     <None Include="hw1\fshader_clip.glsl" />
     <None Include="hw1\fshader_contrast.glsl" />
+    <None Include="hw2\fshader_convolve.glsl" />
     <None Include="hw1\fshader_gamma.glsl" />
     <None Include="hw1\fshader_histoStretch.glsl" />
     <None Include="hw2\fshader_median.glsl" />
@@ -459,11 +460,11 @@
     <None Include="hw1\fshader_threshold.glsl" />
     <CustomBuild Include="qip.qrc">
       <FileType>Document</FileType>
-      <AdditionalInputs Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Release|x64&apos;">qip.qrc;C:\Qt\5.7\msvc2015_64\bin\rcc.exe;vshader_passthrough.glsl;fshader_passthrough.glsl;hw1\vshader_gamma.glsl;hw1\vshader_threshold.glsl;hw1\vshader_clip.glsl;hw1\fshader_clip.glsl;hw1\fshader_quantize.glsl;hw1\fshader_histoStretch.glsl;hw1\vshader_quantize.glsl;hw1\fshader_threshold.glsl;hw1\fshader_contrast.glsl;hw1\vshader_histoStretch.glsl;hw1\fshader_gamma.glsl;hw1\vshader_contrast.glsl;hw2\fshader_blur_weighed.glsl;hw2\fshader_median.glsl;hw2\vshader_median.glsl;hw2\fshader_blur2.glsl;hw2\vshader_blur_weighed.glsl;hw2\vshader_blur2.glsl;hw2\vshader_sharpen.glsl;hw2\fshader_sharpen.glsl;hw2\fshader_blur1.glsl;hw2\vshader_blur.glsl;hw2\fshader_blur.glsl;hw2\vshader_blur1.glsl;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Release|x64&apos;">qip.qrc;C:\Qt\5.7\msvc2015_64\bin\rcc.exe;vshader_passthrough.glsl;fshader_passthrough.glsl;hw1\vshader_gamma.glsl;hw1\vshader_threshold.glsl;hw1\vshader_clip.glsl;hw1\fshader_clip.glsl;hw1\fshader_quantize.glsl;hw1\fshader_histoStretch.glsl;hw1\vshader_quantize.glsl;hw1\fshader_threshold.glsl;hw1\fshader_contrast.glsl;hw1\vshader_histoStretch.glsl;hw1\fshader_gamma.glsl;hw1\vshader_contrast.glsl;hw2\vshader_convolve.glsl;hw2\fshader_blur_weighed.glsl;hw2\fshader_median.glsl;hw2\vshader_median.glsl;hw2\fshader_blur2.glsl;hw2\vshader_blur_weighed.glsl;hw2\vshader_blur2.glsl;hw2\vshader_sharpen.glsl;hw2\fshader_sharpen.glsl;hw2\fshader_convolve.glsl;hw2\fshader_blur1.glsl;hw2\vshader_blur.glsl;hw2\fshader_blur.glsl;hw2\vshader_blur1.glsl;%(AdditionalInputs)</AdditionalInputs>
       <Command Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Release|x64&apos;">C:\Qt\5.7\msvc2015_64\bin\rcc.exe -name qip qip.qrc -o release\qrc_qip.cpp</Command>
       <Message Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Release|x64&apos;">RCC qip.qrc</Message>
       <Outputs Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Release|x64&apos;">release\qrc_qip.cpp;%(Outputs)</Outputs>
-      <AdditionalInputs Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Debug|x64&apos;">qip.qrc;C:\Qt\5.7\msvc2015_64\bin\rcc.exe;vshader_passthrough.glsl;fshader_passthrough.glsl;hw1\vshader_gamma.glsl;hw1\vshader_threshold.glsl;hw1\vshader_clip.glsl;hw1\fshader_clip.glsl;hw1\fshader_quantize.glsl;hw1\fshader_histoStretch.glsl;hw1\vshader_quantize.glsl;hw1\fshader_threshold.glsl;hw1\fshader_contrast.glsl;hw1\vshader_histoStretch.glsl;hw1\fshader_gamma.glsl;hw1\vshader_contrast.glsl;hw2\fshader_blur_weighed.glsl;hw2\fshader_median.glsl;hw2\vshader_median.glsl;hw2\fshader_blur2.glsl;hw2\vshader_blur_weighed.glsl;hw2\vshader_blur2.glsl;hw2\vshader_sharpen.glsl;hw2\fshader_sharpen.glsl;hw2\fshader_blur1.glsl;hw2\vshader_blur.glsl;hw2\fshader_blur.glsl;hw2\vshader_blur1.glsl;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Debug|x64&apos;">qip.qrc;C:\Qt\5.7\msvc2015_64\bin\rcc.exe;vshader_passthrough.glsl;fshader_passthrough.glsl;hw1\vshader_gamma.glsl;hw1\vshader_threshold.glsl;hw1\vshader_clip.glsl;hw1\fshader_clip.glsl;hw1\fshader_quantize.glsl;hw1\fshader_histoStretch.glsl;hw1\vshader_quantize.glsl;hw1\fshader_threshold.glsl;hw1\fshader_contrast.glsl;hw1\vshader_histoStretch.glsl;hw1\fshader_gamma.glsl;hw1\vshader_contrast.glsl;hw2\vshader_convolve.glsl;hw2\fshader_blur_weighed.glsl;hw2\fshader_median.glsl;hw2\vshader_median.glsl;hw2\fshader_blur2.glsl;hw2\vshader_blur_weighed.glsl;hw2\vshader_blur2.glsl;hw2\vshader_sharpen.glsl;hw2\fshader_sharpen.glsl;hw2\fshader_convolve.glsl;hw2\fshader_blur1.glsl;hw2\vshader_blur.glsl;hw2\fshader_blur.glsl;hw2\vshader_blur1.glsl;%(AdditionalInputs)</AdditionalInputs>
       <Command Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Debug|x64&apos;">C:\Qt\5.7\msvc2015_64\bin\rcc.exe -name qip qip.qrc -o debug\qrc_qip.cpp</Command>
       <Message Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Debug|x64&apos;">RCC qip.qrc</Message>
       <Outputs Condition="&apos;$(Configuration)|$(Platform)&apos;==&apos;Debug|x64&apos;">debug\qrc_qip.cpp;%(Outputs)</Outputs>
@@ -474,6 +475,7 @@
     <None Include="hw2\vshader_blur_weighed.glsl" />
     <None Include="hw1\vshader_clip.glsl" />
     <None Include="hw1\vshader_contrast.glsl" />
+    <None Include="hw2\vshader_convolve.glsl" />
     <None Include="hw1\vshader_gamma.glsl" />
     <None Include="hw1\vshader_histoStretch.glsl" />
     <None Include="hw2\vshader_median.glsl" />
