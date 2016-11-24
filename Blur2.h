@@ -2,45 +2,41 @@
 // IMPROC: Image Processing Software Package
 // Copyright (C) 2016 by George Wolberg
 //
-// Convolve.h - Convolve widget
+// Blur.h - Blur widget
 //
 // Written by: George Wolberg, 2016
 // ======================================================================
 
-#ifndef CONVOLVE_H
-#define CONVOLVE_H
+#ifndef BLUR_1P_H
+#define BLUR_1P_H
 
 #include "ImageFilter.h"
-#define KERNEL_SIZE 1000
 
-class Convolve : public ImageFilter {
+class Blur_1P : public ImageFilter {
 	Q_OBJECT
 
 public:
-	Convolve			(QWidget *parent = 0);	// constructor
-	QGroupBox*	controlPanel	();			// create control panel
+	Blur_1P				(QWidget *parent = 0);		// constructor
+	QGroupBox*	controlPanel	();				// create control panel
 	bool		applyFilter	(ImagePtr, bool, ImagePtr);	// apply filter to input
-	void		convolve	(ImagePtr, ImagePtr, ImagePtr);
+	void		reset		();				// reset parameters
+	void		blur		(ImagePtr, int, int, ImagePtr);
 	void		initShader();
 	void		gpuProgram(int pass);	// use GPU program to apply filter
 
 protected slots:
-	int		load		();
+	void		changeFilterW	(int);
+	void		changeFilterH	(int);
+	void		setLock		(int);
 
 private:
 	// widgets
-	QPushButton*	m_button;	// Convolve pushbutton
-	QTextEdit*	m_values;	// text field for kernel values
+	QSlider*	m_slider [2];	// Blur sliders
+	QSpinBox*	m_spinBox[2];	// Blur spin boxes
+	QCheckBox*	m_checkBox;	// Blur check box
 	QGroupBox*	m_ctrlGrp;	// groupbox for panel
-
-	// variables
-	QString		m_file;
-	QString		m_currentDir;
-	ImagePtr	m_kernel;
 	int		m_width;	// input image width
 	int		m_height;	// input image height
-	float m_convolve[KERNEL_SIZE]; // max value is 1000
-
 };
 
-#endif	// CONVOLVE_H
+#endif	// BLUR_H

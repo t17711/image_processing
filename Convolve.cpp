@@ -9,10 +9,10 @@
 
 #include "MainWindow.h"
 #include "Convolve.h"
-//#include "hw2/HW_convolve.cpp"
+#include "hw2/HW_convolve.cpp"
 
 extern MainWindow *g_mainWindowP;
-enum { WSIZE, HSIZE, STEPX, STEPY, KERNEL, SAMPLER };
+enum { WSIZE, HSIZE, WSTEP, HSTEP, SAMPLER, KERNEL };
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Convolve::Convolve:
 //
@@ -93,7 +93,7 @@ Convolve::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 void
 Convolve::convolve(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 {
-//	HW_convolve(I1, kernel, I2);
+	HW_convolve(I1, kernel, I2);
 }
 
 
@@ -148,10 +148,15 @@ Convolve::load()
 
 	// display kernel values
 	m_values->clear();			// clear text edit field (kernel values)
-	for(int y=0; y<h; y++) {		// process all kernel rows
+
+
+	int count = 0;
+	for (int y = 0; y<h; y++) {		// process all kernel rows
 		s.clear();			// clear string
-		for(int x=0; x<w; x++)		// append kernel values to string
-			s.append(QString("%1   ").arg(*p++));
+		for (int x = 0; x < w; x++) {
+			s.append(QString("%1   ").arg(*p));// append kernel values to string
+			m_convolve[count++] = *p++;
+		}
 		m_values->append(s);		// append string to text edit widget
 	}
 
@@ -171,7 +176,33 @@ void
 Convolve::initShader() 
 {
 
-	m_shaderFlag = false;
+	m_nPasses = 1;
+	// initialize GL function resolution for current context
+	initializeGLFunctions();
+
+	UniformMap uniforms;
+
+	// init uniform hash table based on uniform variable names and location IDs
+	uniforms["u_Wsize"] = WSIZE;
+	uniforms["u_WStep"] = WSTEP;
+	uniforms["u_Hsize"] = HSIZE;
+	uniforms["u_HStep"] = HSTEP;
+	uniforms["u_Sampler"] = SAMPLER;
+	uniforms["u_Weight"] = KERNEL;
+
+	QString v_name = ":/vshader_passthrough";
+	QString f_name = ":/hw2/fshader_convolve";
+
+	// compile shader, bind attribute vars, link shader, and initialize uniform var table
+	g_mainWindowP->glw()->initShader(m_program[PASS1],
+							v_name + ".glsl",
+							f_name + ".glsl",
+							uniforms,
+							m_uniform[PASS1]);
+
+	uniforms.clear();
+
+	m_shaderFlag = true;
 }
 
 
@@ -183,5 +214,17 @@ Convolve::initShader()
 void
 Convolve::gpuProgram(int pass) 
 {
+	int w_size = m_kernel->width();
+	int h_size = m_kernel->height();
+	if (w_size % 2 == 0) ++w_size;
+	if (h_size % 2 == 0) ++h_size;
 
+	glUseProgram(m_program[pass].programId());
+	glUniform1i(m_uniform[pass][WSIZE], w_size);
+	glUniform1f(m_uniform[pass][WSTEP], (GLfloat) 1.0f / m_width);
+	glUniform1f(m_uniform[pass][HSTEP], (GLfloat) 1.0f / m_height);
+	glUniform1i(m_uniform[pass][SAMPLER], 0);
+	glUniform1i(m_uniform[pass][HSIZE], h_size);
+
+	glUniform1fv(m_uniform[pass][KERNEL], KERNEL_SIZE, m_convolve);
 }
