@@ -42,11 +42,8 @@ void get_convolve(ChannelPtr<uchar> p2, ChannelPtr<float> kernel, std::deque <uc
 		float val = 0;
 		for (int j = 0; j < ysz; j++) {
 			for (int k = i; k < xsz+i; k++) {
-				float s = *kernel++;
-				val += (buffer[j][k] * (s));
+				val += (buffer[j][k] * (*kernel++));
 			}
-			
-			
 		}
 		kernel -= sz;
 		*p2 = CLIP(round(val), 0, 255);
@@ -83,6 +80,7 @@ HW_convolve(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 		endd2 = p2 + total;
 
 		// create top pad 
+		
 		for (int i = 0; i < ypad; ++i) {
 
 			//xpad is number of pixels to be added to left and right of w 

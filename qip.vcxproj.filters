@@ -286,6 +286,9 @@
     <None Include="hw1\fshader_contrast.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="hw2\fshader_convolve.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="hw1\fshader_gamma.glsl">
       <Filter>Resource Files</Filter>
     </None>
@@ -326,6 +329,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw1\vshader_contrast.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\vshader_convolve.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw1\vshader_gamma.glsl">
