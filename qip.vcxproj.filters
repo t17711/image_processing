@@ -40,12 +40,6 @@
     <ClCompile Include="Blur.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Blur2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Blur_weighed.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Clip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -102,12 +96,6 @@
     <CustomBuild Include="Blur.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="Blur2.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Blur_weighed.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="Clip.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -162,18 +150,6 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="release\.moc\moc_Blur.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="debug\.moc\moc_Blur2.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="release\.moc\moc_Blur2.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="debug\.moc\moc_Blur_weighed.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="release\.moc\moc_Blur_weighed.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="debug\.moc\moc_Clip.cpp">
@@ -268,85 +244,73 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="hw2\fshader_blur.glsl">
+    <None Include="hw2\fshader_blur1.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="hw2\fshader_blur1.glsl">
+    <None Include="hw2\fshader_blur1_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw2\fshader_blur2.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="hw2\fshader_blur_weighed.glsl">
+    <None Include="hw2\fshader_blur2_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw1\fshader_clip.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="hw1\fshader_clip_Mac.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="hw1\fshader_contrast.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\fshader_contrast_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw1\fshader_gamma.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="hw1\fshader_gamma_Mac.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="hw1\fshader_histoStretch.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="hw2\fshader_median.glsl">
+    <None Include="hw1\fshader_histoStretch_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="fshader_passthrough.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="fshader_passthrough_Mac.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="hw1\fshader_quantize.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\fshader_quantize_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw2\fshader_sharpen.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="hw2\fshader_sharpen_Mac.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="hw1\fshader_threshold.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw1\fshader_threshold_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <CustomBuild Include="qip.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <None Include="hw2\vshader_blur.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="hw2\vshader_blur1.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="hw2\vshader_blur2.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="hw2\vshader_blur_weighed.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="hw1\vshader_clip.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="hw1\vshader_contrast.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="hw1\vshader_gamma.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="hw1\vshader_histoStretch.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="hw2\vshader_median.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="vshader_passthrough.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="hw1\vshader_quantize.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="hw2\vshader_sharpen.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="hw1\vshader_threshold.glsl">
+    <None Include="vshader_passthrough_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

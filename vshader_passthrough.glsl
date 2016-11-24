@@ -1,4 +1,4 @@
-#version 150
+#version 130
 
 
 in  vec2	a_Position;	// attribute variable: position vector

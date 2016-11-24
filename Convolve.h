@@ -10,8 +10,6 @@
 #ifndef CONVOLVE_H
 #define CONVOLVE_H
 
-#define KERNEL_SIZE 1000
-
 #include "ImageFilter.h"
 
 class Convolve : public ImageFilter {
@@ -40,7 +38,6 @@ private:
 	ImagePtr	m_kernel;
 	int		m_width;	// input image width
 	int		m_height;	// input image height
-	float m_convolve[KERNEL_SIZE]; // max value is 1000
 };
 
 #endif	// CONVOLVE_H

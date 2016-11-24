@@ -9,7 +9,7 @@
 
 #include "MainWindow.h"
 #include "Blur.h"
-#include "hw2/HW_blur.cpp"
+//#include "hw2/HW_blur.cpp"
 
 extern MainWindow *g_mainWindowP;
 enum { WSIZE, HSIZE, STEP, SAMPLER };
@@ -128,7 +128,7 @@ Blur::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 void
 Blur::blur(ImagePtr I1, int w, int h, ImagePtr I2)
 {
-	HW_blur(I1, w, h, I2);
+//	HW_blur(I1, w, h, I2);
 }
 
 
@@ -247,10 +247,18 @@ Blur::initShader()
 	uniforms["u_Step"   ] = STEP;
 	uniforms["u_Sampler"] = SAMPLER;
 
+        QString v_name = ":/vshader_passthrough";
+        QString f_name = ":/hw2/fshader_blur1";
+        
+#ifdef __APPLE__
+        v_name += "_Mac";
+        f_name += "_Mac"; 
+#endif    
+
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
-	g_mainWindowP->glw()->initShader(m_program[PASS1],
-					 QString(":/hw2/vshader_blur1.glsl"),
-					 QString(":/hw2/fshader_blur1.glsl"),
+	g_mainWindowP->glw()->initShader(m_program[PASS1], 
+	                                 v_name + ".glsl", 
+	                                 f_name + ".glsl",
 					 uniforms,
 					 m_uniform[PASS1]);
 	uniforms.clear();
@@ -260,10 +268,18 @@ Blur::initShader()
 	uniforms["u_Step"   ] = STEP;
 	uniforms["u_Sampler"] = SAMPLER;
 
+        v_name = ":/vshader_passthrough";
+        f_name = ":/hw2/fshader_blur2";
+        
+#ifdef __APPLE__
+        v_name += "_Mac";
+        f_name += "_Mac"; 
+#endif    
+
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
-	g_mainWindowP->glw()->initShader(m_program[PASS2],
-					 QString(":/hw2/vshader_blur2.glsl"),
-					 QString(":/hw2/fshader_blur2.glsl"),
+	g_mainWindowP->glw()->initShader(m_program[PASS2], 
+	                                 v_name + ".glsl", 
+	                                 f_name + ".glsl",
 					 uniforms,
 					 m_uniform[PASS2]);
 
