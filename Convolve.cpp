@@ -20,7 +20,9 @@ enum { WSIZE, HSIZE, WSTEP, HSTEP, SAMPLER, KERNEL };
 //
 Convolve::Convolve(QWidget *parent) : ImageFilter(parent)
 {
+
 	m_kernel = NULL;
+	
 }
 
 
@@ -109,19 +111,19 @@ Convolve::load()
 	QFileDialog dialog(this);
 
 	// open the last known working directory
-	if(!m_currentDir.isEmpty())
+	if (!m_currentDir.isEmpty())
 		dialog.setDirectory(m_currentDir);
 
 	// display existing files and directories
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
 	// invoke native file browser to select file
-	m_file =  dialog.getOpenFileName(this,
+	m_file = dialog.getOpenFileName(this,
 		"Open File", m_currentDir,
 		"Images (*.AF);;All files (*)");
 
 	// verify that file selection was made
-	if(m_file.isNull()) return 0;
+	if (m_file.isNull()) return 0;
 
 	// save current directory
 	QFileInfo f(m_file);
@@ -131,7 +133,7 @@ Convolve::load()
 	m_kernel = IP_readImage(qPrintable(m_file));
 
 	// init vars
-	int w = m_kernel->width ();
+	int w = m_kernel->width();
 	int h = m_kernel->height();
 
 	// update button with filename (without path)
@@ -149,7 +151,6 @@ Convolve::load()
 	// display kernel values
 	m_values->clear();			// clear text edit field (kernel values)
 
-
 	int count = 0;
 	for (int y = 0; y<h; y++) {		// process all kernel rows
 		s.clear();			// clear string
@@ -162,7 +163,6 @@ Convolve::load()
 
 	// apply filter to source image and display result
 	g_mainWindowP->preview();
-
 	return 1;
 }
 
@@ -179,7 +179,7 @@ Convolve::initShader()
 	m_nPasses = 1;
 	// initialize GL function resolution for current context
 	initializeGLFunctions();
-
+	
 	UniformMap uniforms;
 
 	// init uniform hash table based on uniform variable names and location IDs
@@ -201,6 +201,7 @@ Convolve::initShader()
 							m_uniform[PASS1]);
 
 	uniforms.clear();
+
 
 	m_shaderFlag = true;
 }
@@ -227,4 +228,7 @@ Convolve::gpuProgram(int pass)
 	glUniform1i(m_uniform[pass][HSIZE], h_size);
 
 	glUniform1fv(m_uniform[pass][KERNEL], KERNEL_SIZE, m_convolve);
+
+
+
 }

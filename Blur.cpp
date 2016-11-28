@@ -310,7 +310,7 @@ Blur::gpuProgram(int pass)
 			glUseProgram(m_program[PASS2].programId());
 			glUniform1i (m_uniform[PASS2][HSIZE], h_size);
 			glUniform1f (m_uniform[PASS2][STEP],  (GLfloat) 1.0f / m_height);
-			glUniform1i (m_uniform[PASS2][SAMPLER], 0);
+			glUniform1i (m_uniform[PASS2][SAMPLER], PASS2-1);
 			break;
 	}
 }

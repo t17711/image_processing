@@ -22,5 +22,10 @@
 		<file>hw2/fshader_blur2_Mac.glsl</file>
 		<file>hw2/fshader_sharpen.glsl</file>
 		<file>hw2/fshader_sharpen_Mac.glsl</file>
+		<file>hw2/fshader_convolve.glsl</file>
+		<file>hw2/fshader_median.glsl</file>
+		<file>hw2/fshader_blur_weighed.glsl</file>
+		<file>hw2/fshader_blur.glsl</file>
+		<file>hw2/fshader_correlation.glsl</file>
 	</qresource>
 </RCC>

@@ -40,6 +40,12 @@
     <ClCompile Include="Blur.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Blur2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Blur_weighed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Clip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -47,6 +53,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Convolve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Correlation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Dummy.cpp">
@@ -96,6 +105,12 @@
     <CustomBuild Include="Blur.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="Blur2.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Blur_weighed.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="Clip.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -103,6 +118,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Convolve.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Correlation.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Dummy.h">
@@ -152,6 +170,18 @@
     <ClCompile Include="release\.moc\moc_Blur.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="debug\.moc\moc_Blur2.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_Blur2.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_Blur_weighed.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_Blur_weighed.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="debug\.moc\moc_Clip.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -168,6 +198,12 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="release\.moc\moc_Convolve.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\.moc\moc_Correlation.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\.moc\moc_Correlation.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="debug\.moc\moc_Dummy.cpp">
@@ -244,6 +280,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="hw2\fshader_blur.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="hw2\fshader_blur1.glsl">
       <Filter>Resource Files</Filter>
     </None>
@@ -254,6 +293,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw2\fshader_blur2_Mac.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\fshader_blur_weighed.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw1\fshader_clip.glsl">
@@ -268,6 +310,12 @@
     <None Include="hw1\fshader_contrast_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="hw2\fshader_convolve.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\fshader_correlation.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="hw1\fshader_gamma.glsl">
       <Filter>Resource Files</Filter>
     </None>
@@ -278,6 +326,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw1\fshader_histoStretch_Mac.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\fshader_median.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="fshader_passthrough.glsl">

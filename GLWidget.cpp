@@ -203,7 +203,6 @@ GLWidget::allocateTextureFBO(int w, int h)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 			       GL_TEXTURE_2D, m_texture_fbo[PASS1], 0);
 
-
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[PASS2]);
 	glBindTexture(GL_TEXTURE_2D, m_texture_fbo[PASS2]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -216,6 +215,7 @@ GLWidget::allocateTextureFBO(int w, int h)
 			       GL_TEXTURE_2D, m_texture_fbo[PASS2], 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
 
 
@@ -313,6 +313,7 @@ GLWidget::initShaders()
 	g_mainWindowP->imageFilter(SHARPEN)->initShader();
 	g_mainWindowP->imageFilter(MEDIAN)->initShader();
 	g_mainWindowP->imageFilter(CONVOLVE)->initShader();
+	g_mainWindowP->imageFilter(CORRELATION)->initShader();
 
 
 }
@@ -411,7 +412,7 @@ GLWidget::paintGL()
 		case 2: // display rendered texture by GPU filter
 			int n = g_mainWindowP->gpuPasses();
 			glBindTexture(GL_TEXTURE_2D, m_texture_fbo[n-1]);
-			glUniform1i(m_uniform[SAMPLER], 0); 
+			glUniform1i(m_uniform[SAMPLER], 0);
 			break;
 	}
 	 

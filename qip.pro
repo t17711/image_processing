@@ -59,10 +59,13 @@ HEADERS +=	MainWindow.h	\
 		HistoMatch.h	\
 		ErrDiffusion.h	\
 		Blur.h		\
+		Blur2.h		\
+		Blur_weighed.h		\
 		Sharpen.h	\
 		Median.h	\
 		GLWidget.h	\
-		Convolve.h	
+		Convolve.h	\
+		Correlation.h
 
 		
 SOURCES +=	main.cpp	\ 
@@ -79,7 +82,10 @@ SOURCES +=	main.cpp	\
 		HistoMatch.cpp	\
 		ErrDiffusion.cpp\
 		Blur.cpp	\
+		Blur2.cpp	\
+		Blur_weighed.cpp	\
 		Sharpen.cpp	\
 		Median.cpp	\
 		GLWidget.cpp	\
-		Convolve.cpp	
+		Convolve.cpp	\
+		Correlation.cpp

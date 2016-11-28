@@ -35,7 +35,7 @@
 #define MAXFILTERS	50
 enum {
 	DUMMY, THRESHOLD, CLIP, QUANTIZE, GAMMA, CONTRAST, HISTOSTRETCH, HISTOMATCH,
-	ERRDIFFUSION, BLUR,BLUR2, BLUR_W, SHARPEN, MEDIAN, CONVOLVE
+	ERRDIFFUSION, BLUR,BLUR2, BLUR_W, SHARPEN, MEDIAN, CONVOLVE, CORRELATION
 };
 using namespace IP;
 
@@ -135,6 +135,7 @@ private:
 	QAction*		m_actionSharpen	    ;
 	QAction*		m_actionMedian	    ;
 	QAction*		m_actionConvolve    ;
+	QAction*		m_actionCorrelation;
 
 
 	// homework objects
