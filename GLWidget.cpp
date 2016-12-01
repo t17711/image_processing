@@ -62,6 +62,7 @@ GLWidget::initializeGL()
 	// generate output texture name 
 	glGenTextures(1, &m_outTexture);
 
+	glGenTextures(1, &m_TemplateTexture);
 	// generate frame buffer
 	glGenFramebuffers(1, &m_fbo[PASS1]);
 	glGenFramebuffers(1, &m_fbo[PASS2]);
@@ -144,7 +145,7 @@ GLWidget::setInTexture(QImage &image)
 	m_imageH = qImage.height();
 
 	// bind texture
-	glActiveTexture(0);
+	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_2D, m_inTexture);
 
 	// set the texture parameters
@@ -174,7 +175,7 @@ GLWidget::setOutTexture(QImage &image) {
 	m_imageH = qImage.height();
 
 	// bind texture
-	glActiveTexture(1);
+	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_2D, m_outTexture);
 
 	// set the texture parameters
@@ -192,7 +193,9 @@ GLWidget::allocateTextureFBO(int w, int h)
 {
 
 	// bind texture
+	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[PASS1]);
+	//glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, m_texture_fbo[PASS1]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -204,6 +207,8 @@ GLWidget::allocateTextureFBO(int w, int h)
 			       GL_TEXTURE_2D, m_texture_fbo[PASS1], 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[PASS2]);
+	//glActiveTexture(GL_TEXTURE4);
+
 	glBindTexture(GL_TEXTURE_2D, m_texture_fbo[PASS2]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -412,7 +417,7 @@ GLWidget::paintGL()
 		case 2: // display rendered texture by GPU filter
 			int n = g_mainWindowP->gpuPasses();
 			glBindTexture(GL_TEXTURE_2D, m_texture_fbo[n-1]);
-			glUniform1i(m_uniform[SAMPLER], 0);
+			glUniform1i(m_uniform[SAMPLER],0);
 			break;
 	}
 	 
@@ -459,7 +464,6 @@ GLWidget::applyFilterGPU(int nPasses)
 		else
 			glBindTexture(GL_TEXTURE_2D, m_texture_fbo[pass-1]);
 
-
 		g_mainWindowP->gpuProgram(pass);
 
 		// draw triangles
@@ -497,5 +501,36 @@ GLWidget::setDstImage(int pass)
 	g_mainWindowP->setImageDst(ipImage);
 	glViewport(0, 0, m_winW, m_winH);
 
+
+}
+
+GLuint* GLWidget::setTemplateTexture(QImage & image)
+{
+	// convert jpg to GL formatted image
+	QImage qImage = QGLWidget::convertToGLFormat(image);
+
+	// init vars
+	m_imageW = qImage.width();
+	m_imageH = qImage.height();
+
+	// bind texture
+	glActiveTexture(GL_TEXTURE0+1);
+	glBindTexture(GL_TEXTURE_2D, m_TemplateTexture);
+
+	// set the texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// upload to GPU
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_imageW, m_imageH, 0, GL_RGBA, GL_UNSIGNED_BYTE, qImage.bits());
+	//glBindTexture(GL_TEXTURE_2D, 0);
+
+	return &m_TemplateTexture;
+}
+
+void GLWidget::m_setTemplate(GLint addr)
+{
+	glUniform1i(addr, 1);
 
 }
