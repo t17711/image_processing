@@ -7,20 +7,13 @@
 #include "hw2/IPconvolve.cpp"
 
 extern MainWindow *g_mainWindowP;
-enum { WSTEP_S, HSTEP_S, WSIZE_K, HSIZE_K, WSTEP_K, HSTEP_K, OFFSET, SAMPLER, KERNEL };
+enum { WSTEP_S, HSTEP_S, WSIZE_K, HSIZE_K, WSTEP_K, HSTEP_K, OFFSET, COLOR,SAMPLER, KERNEL };
 
 Correlation::Correlation(QWidget *parent) : ImageFilter(parent)
 {
 	m_kernel = NULL;
-	glGenTextures(1, &m_tex);
-	glBindTexture(GL_TEXTURE_2D, m_tex);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//NULL means reserve texture memory, but texels are undefined
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-
+	
+	
 }
 
 
@@ -42,8 +35,8 @@ QGroupBox * Correlation::controlPanel()
 
 	// create label  widget
 	m_kernel_label = new QLabel();
-	//m_kernel_label->setMaximumSize(100, 100);
-	//m_kernel_label->setMinimumSize(50, 50);
+	m_kernel_label->setMaximumSize(100, 100);
+	m_kernel_label->setMinimumSize(50, 50);
 
 	// assemble dialog
 	vbox->addWidget(m_button);
@@ -71,6 +64,10 @@ bool Correlation::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 	if (m_kernel.isNull())	return 0;
 	m_width_i = I1->width();
 	m_height_i = I1->height();
+	if (I1->imageType() != BW_IMAGE) m_color = true;
+	else m_color = false;
+
+
 	// convolve image
 	if (!(gpuFlag && m_shaderFlag))
 		corr(I1, m_kernel, I2);
@@ -118,17 +115,13 @@ Correlation::load()
 	// update button with filename (without path)
 	m_button->setText(f.fileName());
 	m_button->update();
-	QImage q;
-
-	IP_IPtoQImage(m_kernel, q);
 	
-	m_kernel_label->setPixmap(QPixmap::fromImage(q, Qt::AutoColor));
-
-
-	//q = GLWidget::convertToGLFormat(q);
+	IP_IPtoQImage(m_kernel, m_image);
 	
-	//glBindTexture(GL_TEXTURE_2D, m_tex);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width_k, m_height_k, 0, GL_RGBA, GL_UNSIGNED_BYTE, q.bits());
+	m_kernel_label->setPixmap(QPixmap::fromImage(m_image, Qt::AutoColor));
+	
+	//m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
+//	g_mainWindowP->glw()->m_setTemplate(m_uniform[PASS1][KERNEL]);
 
 	g_mainWindowP->preview();
 
@@ -186,9 +179,10 @@ void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 	IP_copyImageHeader(kernel, Kernel_BW);
 
 	IP_castImage(kernel, BW_IMAGE, Kernel_BW);
-	if (I1->imageType() != BW_IMAGE) {
-		IP_copyImageHeader(I1, I1_BW);
-		IP_castImage(I1, BW_IMAGE, I1_BW);
+	IP_copyImageHeader(I1, I1_BW);
+	IP_castImage(I1, BW_IMAGE, I1_BW);
+
+	if (m_color) {
 		val = IP_correlation(I1_BW, Kernel_BW, 1, 1, xx, yy);
 	}
 	else {
@@ -196,7 +190,12 @@ void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 	}
 	
 	// displlay output
-	setoutput(I1, kernel, I2, xx, yy);
+	if (!m_color) {
+		setoutput(I1, Kernel_BW, I2, xx, yy);
+	}
+	else {
+		setoutput(I1, kernel, I2, xx, yy);
+	}
 }
 
 
@@ -213,13 +212,13 @@ void Correlation::initShader()
 	// init uniform hash table based on uniform variable names and location IDs
 	uniforms["u_WStep_s"] = WSTEP_S;
 	uniforms["u_HStep_s"] = HSTEP_S;
-
 	uniforms["u_Wsize_k"] = WSIZE_K;
 	uniforms["u_Hsize_k"] = HSIZE_K;
 	uniforms["u_WStep_k"] = WSTEP_K;
 	uniforms["u_HStep_k"] = HSTEP_K;
 	uniforms["u_Sampler"] = SAMPLER;
-//	uniforms["u_Kernel"] = KERNEL;
+	uniforms["u_Kernel"] = KERNEL;
+	uniforms["u_Color"] = COLOR;
 
 	QString v_name = ":/vshader_passthrough";
 	QString f_name = ":/hw2/fshader_correlation";
@@ -244,8 +243,9 @@ void Correlation::gpuProgram(int pass)
 	if (h_size % 2 == 0) ++h_size;
 
 	glUseProgram(m_program[pass].programId());
-
 	// pass values for texture
+	m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
+	glUniform1i(m_uniform[pass][KERNEL], 1);
 	glUniform1f(m_uniform[pass][WSTEP_S], (GLfloat) 1.0f / m_width_i);
 	glUniform1f(m_uniform[pass][HSTEP_S], (GLfloat) 1.0f / m_height_i);
 	
@@ -254,10 +254,9 @@ void Correlation::gpuProgram(int pass)
 	glUniform1i(m_uniform[pass][WSIZE_K], w_size);
 	glUniform1f(m_uniform[pass][WSTEP_K], (GLfloat) 1.0f / w_size);
 	glUniform1f(m_uniform[pass][HSTEP_K], (GLfloat) 1.0f / h_size);
+	glUniform1i(m_uniform[pass][COLOR], m_color);
 	glUniform1i(m_uniform[pass][SAMPLER], 0);
 
-	//glBindTexture(GL_TEXTURE_2D, m_tex);
-	//glUniform1i(m_uniform[PASS1][KERNEL], 0);
-
-
+	//g_mainWindowP->glw()->m_setTemplate(m_uniform[pass][KERNEL]);
+	//glBindTexture(GL_TEXTURE_2D, *m_tex);
 }

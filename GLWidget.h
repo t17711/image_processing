@@ -43,6 +43,8 @@ public:
 	void	initShader(QGLShaderProgram &, QString, QString, UniformMap &, int *);
 	void	applyFilterGPU(int);
 	void	setDstImage(int);
+	GLuint*	setTemplateTexture(QImage &);
+	void			m_setTemplate(GLint addr);
 
 protected:
 
@@ -65,6 +67,8 @@ private:
 	GLuint			m_texCoordBuffer;			// handle to texture coordinate buffer
 	GLuint			m_inTexture;				// texture unit for dispalying input
 	GLuint			m_outTexture;				// texture unit for dispalying output
+	GLuint			m_TemplateTexture;				// texture unit for passing template
+
 	GLuint			m_fbo[2];				// handle to frame buffer object
 	GLuint			m_texture_fbo[2];			// texture unit for render to texture
 	QGLShaderProgram	m_program;				// GLSL programs

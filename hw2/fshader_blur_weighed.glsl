@@ -17,8 +17,6 @@ void main() {
 	int  h2  = u_Hsize / 2;
 
 	int sz = (u_Wsize*u_Hsize);
-	float wt_hstep = 1.0/u_Hsize;
-	float wt_wstep = 1.0/u_Wsize;
 
 	for(int i=-h2, ii =0; i<=h2; ++i){
 		for(int j=-w2; j<=w2; ++j,++ii){
