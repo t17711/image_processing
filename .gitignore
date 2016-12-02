@@ -3,3 +3,10 @@
 ################################################################################
 
 /debug
+/.vs/qip/v14
+/obj
+/release
+/qip.vcxproj.user
+/qip.VC.VC.opendb
+/qip.VC.db
+/qip.sln

@@ -108,7 +108,6 @@ Correlation::load()
 
 	// read kernel
 	m_kernel = IP_readImage(qPrintable(m_file));
-
 	m_width_k = m_kernel->width();
 	m_height_k = m_kernel->height();
 
@@ -117,11 +116,12 @@ Correlation::load()
 	m_button->update();
 	
 	IP_IPtoQImage(m_kernel, m_image);
-	
+
+
 	m_kernel_label->setPixmap(QPixmap::fromImage(m_image, Qt::AutoColor));
 	
 	//m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
-//	g_mainWindowP->glw()->m_setTemplate(m_uniform[PASS1][KERNEL]);
+	//	g_mainWindowP->glw()->m_setTemplate(m_uniform[PASS1][KERNEL]);
 
 	g_mainWindowP->preview();
 
@@ -246,14 +246,15 @@ void Correlation::gpuProgram(int pass)
 	// pass values for texture
 	m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
 	glUniform1i(m_uniform[pass][KERNEL], 1);
+
 	glUniform1f(m_uniform[pass][WSTEP_S], (GLfloat) 1.0f / m_width_i);
 	glUniform1f(m_uniform[pass][HSTEP_S], (GLfloat) 1.0f / m_height_i);
 	
 	// pass values for correlate
 	glUniform1i(m_uniform[pass][HSIZE_K], h_size);
 	glUniform1i(m_uniform[pass][WSIZE_K], w_size);
-	glUniform1f(m_uniform[pass][WSTEP_K], (GLfloat) 1.0f / w_size);
-	glUniform1f(m_uniform[pass][HSTEP_K], (GLfloat) 1.0f / h_size);
+	glUniform1f(m_uniform[pass][WSTEP_K], (GLfloat) 1.0f / (2.0f*w_size));
+	glUniform1f(m_uniform[pass][HSTEP_K], (GLfloat) 1.0f / (2.0f*h_size));
 	glUniform1i(m_uniform[pass][COLOR], m_color);
 	glUniform1i(m_uniform[pass][SAMPLER], 0);
 

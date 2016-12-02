@@ -1,4 +1,4 @@
-#version 330
+#version 120
 
 in	vec2	  v_TexCoord;	// varying variable for passing texture coordinate from vertex shader
 
@@ -17,59 +17,44 @@ uniform int u_Color;
 
 void main() {
 	vec2 tc  = v_TexCoord;
+	vec3 sm1 =vec3(0.0f);
+	vec3 sm2 =vec3(1.0f);
 	float sum1 = 1.0f;
 	float sum2 = 1.0f;
-	float image=0.0f;
-	float kernel = 0.0f;
+	vec3 image=	vec3(0.0f);
+	vec3 kernel = vec3(0.0f);
 	vec3 pt1 = vec3(0.0);
 	vec3 pt2 = vec3(0.0);
 
-	#if 0
-	//vec3 s1= vec3(0.0);
+	#if 1
+	vec3 s1= vec3(0.3f,0.6f,0.1f);
 	//vec3 s2= vec3(0.0);
 
-	for(int i = 0; i<= u_Hsize_k; ++i){
-		for (int j =0; j <= u_Wsize_k; ++j){
+	for(int i = 0; i<= u_Hsize_k; i+=8){
+		for (int j =0; j <= u_Wsize_k; j+=8){
 		//!		CROSS_CORR (cross correlation):
 		//!		<pre>
 		//!		C(u,v) = sum of {T(x,y) * I(x-u,y-v)}
 		//!			 --------------------------------
 		//!			 sqrt{ sum of {I(x-u,y-v)^2}}
-		if(u_Color == 1){
-				pt1 = texture2D(u_Sampler,vec2(tc.x + i*u_WStep_s, tc.y + j *u_HStep_s)).rgb;
-				pt2 = texture2D(u_Kernel,vec2(i*u_WStep_k, j *u_HStep_k)).rgb;
-
-					// get grey value
-				image = 0.3*pt1.r + 0.6* pt1.g + 0.1 *pt1.b;
-				kernel=  0.3*pt2.r + 0.6* pt2.g + 0.1 *pt2.b;
-				sum1 += (image*kernel);
-				sum2 += (image*image);
-			}
-				else{
-				image = texture2D(u_Sampler,vec2(tc.x + i*u_WStep_s, tc.y + j *u_HStep_s)).r;
-				kernel = texture2D(u_Kernel,vec2(i*u_WStep_k, j *u_HStep_k)).r;	
-				sum1 += (image*kernel);
-				sum2 += (pow(image,2));
-				}
-				
+			pt1 = texture2D(u_Sampler,vec2(tc.x + i*u_WStep_s, tc.y + j *u_HStep_s)).rgb;
+			pt2 = texture2D(u_Kernel,vec2(i*u_WStep_k, j *u_HStep_k)).rgb;
+			sm1 += pt1*pt2;
+			sm2 += pt1*pt1;		
 		}
 	}
 
+	sm1 = sm1/sqrt(sm2);
 
-	if(sum2<=0.0f) sum2 = 1.0f;
-	else sum2 = inversesqrt(sum2);
+	sm1 = s1*sm1/75.0;;
 
-	float c = (sum1*sum2);
-
-	
-		gl_FragColor = vec4(c,c,c,1.0);
+	sum1 = sm1.r+sm1.g+sm1.b;
+	gl_FragColor = vec4(sum1,sum1,sum1,1.0);
 	#else
 			pt1 = (texture2D(u_Sampler,v_TexCoord)).rgb;
 			pt2 = (texture2D(u_Kernel,v_TexCoord)).rgb;
 
 			gl_FragColor = vec4(pt1+pt2,1.0);
-
-
 		
 	#endif
 
