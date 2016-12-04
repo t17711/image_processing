@@ -534,3 +534,26 @@ void GLWidget::m_setTemplate(GLint addr)
 	glUniform1i(addr, 1);
 
 }
+
+
+void
+GLWidget::get_img(int pass, std::vector<int>& image, int w, int h)
+{
+	glViewport(0, 0, m_imageW, m_imageH);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
+
+
+	int total = w*h;
+	int* p = (int*)(malloc(total * sizeof(int)));
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
+	glReadPixels(0, 0, w, h, GL_ALPHA, GL_INT, p);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);	
+
+	for (int i = total-1; i >=0 ; --i) image.push_back(p[i]);
+	
+	free(p);
+	
+	glViewport(0, 0, m_winW, m_winH);
+}

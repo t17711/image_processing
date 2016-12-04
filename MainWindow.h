@@ -53,6 +53,13 @@ public:
 			IP_castImage(I, BW_IMAGE, I);
 		m_imageDst = I;
 	}
+
+	void		setImageSrc(ImagePtr I) {
+		if (m_radioMode[1]->isChecked())
+			IP_castImage(I, BW_IMAGE, I);
+		m_imageSrc = I;
+	}
+
 	QCustomPlot*	histogram	()      
 		{return m_histogram;}
 	GLWidget*	glw		()      

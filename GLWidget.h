@@ -18,7 +18,7 @@
 #include <QGLFunctions>
 #include <QGLShaderProgram>
 #include <QtOpenGL>
-
+#include "IP.h"
 typedef QVector2D vec2;
 typedef QVector3D vec3;
 
@@ -45,6 +45,7 @@ public:
 	void	setDstImage(int);
 	GLuint*	setTemplateTexture(QImage &);
 	void			m_setTemplate(GLint addr);
+	void  get_img(int, std::vector<int>&,int,int);
 
 protected:
 
