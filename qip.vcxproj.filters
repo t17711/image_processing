@@ -295,7 +295,13 @@
     <None Include="hw2\fshader_blur2_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="hw2\fshader_blur_Mac.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="hw2\fshader_blur_weighed.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\fshader_blur_weighed_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw1\fshader_clip.glsl">
@@ -313,7 +319,13 @@
     <None Include="hw2\fshader_convolve.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="hw2\fshader_convolve_Mac.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="hw2\fshader_correlation.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\fshader_correlation_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw1\fshader_gamma.glsl">
@@ -329,6 +341,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hw2\fshader_median.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="hw2\fshader_median_Mac.glsl">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="fshader_passthrough.glsl">

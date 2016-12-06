@@ -229,6 +229,11 @@ Median::initShader()
 	QString f_name = ":/hw2/fshader_median";
 
 
+#ifdef __APPLE__
+	v_name += "_Mac";
+	f_name += "_Mac";
+#endif   
+
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
 	g_mainWindowP->glw()->initShader(m_program[PASS1],
 		v_name + ".glsl",

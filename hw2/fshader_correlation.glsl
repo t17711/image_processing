@@ -36,7 +36,7 @@ void main() {
 		vec3 s= vec3(0.3f,0.6f,0.1f);
 		//vec3 s2= vec3(0.0);
 
-		int factor = 1; // because gpu hanged
+		int factor = 2; // because gpu hanged
 
 		for(int i = 0; i<= u_Hsize_k; i+=factor){
 			for (int j =0; j <= u_Wsize_k; j+=factor){
@@ -77,10 +77,10 @@ void main() {
 		sm1 = sm1*sm2*s;
 
 		if(u_Color ==1){
-				sum1 = sm1.r+sm1.g+sm1.b;
+				sum1 = clamp(sm1.r+sm1.g+sm1.b,0.0f,1.0f);
 		}
 		else 
-			sum1 = sm1.r;
+			sum1 = clamp(sm1.r,0.0f,1.0f);
 		gl_FragColor = vec4(sum1,sum1,sum1,sum1);
 	}
 	else{

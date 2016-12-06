@@ -152,7 +152,7 @@ void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, i
 
 	if (ker_total > total) return;
 	if (yy > m_height_i - kernel->height()) return; // cant below in image height- ker height
-	if (yy > m_width_i - kernel->width()) return; // cant below in image width - ker width
+	if (xx > m_width_i - kernel->width()) return; // cant below in image width - ker width
 
 	int type;
 	int x = 0;
@@ -241,6 +241,12 @@ void Correlation::initShader()
 	uniforms["u_passthrough"] = PASS;
 	QString v_name = ":/vshader_passthrough";
 	QString f_name = ":/hw2/fshader_correlation";
+
+
+#ifdef __APPLE__
+	v_name += "_Mac";
+	f_name += "_Mac";
+#endif   
 
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
 	g_mainWindowP->glw()->initShader(m_program[PASS1],
