@@ -539,9 +539,25 @@ void GLWidget::m_setTemplate(GLint addr)
 void
 GLWidget::get_img(int pass, std::vector<int>& image, int w, int h)
 {
-	glViewport(0, 0, m_imageW, m_imageH);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
 
+
+	//glViewport(0, 0, m_imageW, m_imageH);
+	//ImagePtr I = IP_allocImage(3 * m_imageW, m_imageH, BW_TYPE);
+	//ChannelPtr<uchar> p = I[0];
+	//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
+	//glReadPixels(0, 0, m_imageW, m_imageH, GL_RGB, GL_UNSIGNED_BYTE, &p[0]);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//// uninterleave image
+	//ImagePtr ipImage = IP_allocImage(m_imageW, m_imageH, RGB_TYPE);
+	//IP_uninterleave(I, ipImage);
+	//g_mainWindowP->setImageDst(ipImage);
+	//glViewport(0, 0, m_winW, m_winH);
+
+
+	glViewport(0, 0, w, h);
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
 
 	int total = w*h;
 	int* p = (int*)(malloc(total * sizeof(int)));
@@ -551,7 +567,7 @@ GLWidget::get_img(int pass, std::vector<int>& image, int w, int h)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);	
 
-	for (int i = total-1; i >=0 ; --i) image.push_back(p[i]);
+	for (int i = 0; i <total ; ++i) image.push_back(p[i]);
 	
 	free(p);
 	

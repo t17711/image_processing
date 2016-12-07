@@ -151,8 +151,7 @@ void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, i
 	// if the coordinate falls between (xx, yy), (xx+kernel_width, yy +yernel_height)
 
 	if (ker_total > total) return;
-	if (yy > m_height_i - kernel->height()) return; // cant below in image height- ker height
-	if (xx > m_width_i - kernel->width()) return; // cant below in image width - ker width
+
 
 	int type;
 	int x = 0;
@@ -262,6 +261,8 @@ void Correlation::initShader()
 
 void Correlation::gpuProgram(int pass)
 {
+
+
 	int w_size = m_width_k;
 	int h_size = m_height_k;
 	if (w_size % 2 == 0) ++w_size;
@@ -306,6 +307,8 @@ void Correlation::gpuProgram(int pass)
 
 int Correlation::GPU_out()
 {
+	m_GPU_out->setDisabled(true);
+
 	// there is already image in  g_mainwindou destination. 
 	// h\get max position from that in x and y coordinate and send to setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, int yy) function
 	if (!m_gpu_processed) return 0;
@@ -325,48 +328,39 @@ int Correlation::GPU_out()
 	//int total = w*h;
 
 
-	int max = 0;
+	
 	int max_pos = 0;
 	int pos = 0;
 
-	//int type;
-	//ChannelPtr<uchar> p1, p2, endd;
-	//IP_getChannel(m_Gpu_output, 0, p1, type);
-	//	// go upto yy th row
-	//for (endd = p1 + total; p1 < endd;) {
-	//	if (*p1 < max) {
-	//		max = *p1;
-	//		max_pos = pos;
-	//	}
-	//	pos++;
-	//	p1++;
-	//}
 	int x = 0;
 	int y = 0;
 	int kw = m_kernel->width();
 	int kh = m_kernel->height();
 
+	pos = total - 1;
+	int max = val[pos];
 	// loop through pixel dont have t look h-kh & w - kw place
-	for (int j = 0; j < h - kh; ++j) {
-		for (int i =0; i < w - kw; ++i) {
-			
-			if (max < val[pos]) {
-				max = val[pos];
-				max_pos = pos;
-				x = i;
-				y = j;
-			}
-			pos++;
+	/*for (int j = 0; j < h; ++j) {
+		for (int i =0; i < w; ++i) {
+			*/
 
+	while (pos >= 0) {
+		if (max > val[pos]) {
+			max = val[pos];
+			max_pos = pos;
 		}
+		pos--;
 	}
+	/*	}
+	}
+*/
+
+	x = max_pos%w;
+	y = max_pos / w;
 
 
-	if (m_width_i - x <kw  || m_height_i - y < kh) {
-		g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
-		g_mainWindowP->glw()->update();
-		return 0;
-	}
+	if (x > (w - kw)) x = w - kw;
+	if (y > (h - kh)) y = h - kh;
 
 	// do correlation on grey
 	ImagePtr  Kernel_BW;
