@@ -70,18 +70,18 @@ bool Correlation::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 	if (m_kernel.isNull())	return 0;
 	m_width_i = I1->width();
 	m_height_i = I1->height();
-	
-	if (I1->imageType() != BW_IMAGE) m_color = true;
-	else m_color = false;
+
+	if (I1->imageType() == BW_IMAGE) m_color = false;
+	else m_color = true;
 
 	// convolve image
 	if (!(gpuFlag && m_shaderFlag)) {
+		m_passthrough = false;
+		m_gpu_processed = false;
 		m_GPU_out->setDisabled(true);
-		m_gpu_processed = false; // gpu not used
 		corr(I1, m_kernel, I2);
 	}
 	else {
-		m_gpu_processed = true; // gpu not used
 		g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
 	}
 	return 1;
@@ -143,15 +143,8 @@ Correlation::load()
 
 void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, int yy)
 {
-	m_passthrough = false;
 	IP_copyImageHeader(I1, I2);
 	int total = m_width_i * m_height_i;
-
-	int ker_total = kernel->height() * kernel->width();
-	// if the coordinate falls between (xx, yy), (xx+kernel_width, yy +yernel_height)
-
-	if (ker_total > total) return;
-
 
 	int type;
 	int x = 0;
@@ -187,7 +180,16 @@ void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, i
 
 void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 {
-	m_passthrough = false;
+	// if the coordinate falls between (xx, yy), (xx+kernel_width, yy +yernel_height)
+	if (m_width_k > m_width_i || m_height_k > m_height_i) {
+
+		IP_copyImageHeader(I1, I2);
+		IP_copyImage(I1, I2);
+
+		return;
+	}
+
+
 	int xx;
 	int yy;
 	float val = 0.0f;
@@ -195,8 +197,8 @@ void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 	// do correlation on grey
 	ImagePtr I1_BW, Kernel_BW;
 	IP_copyImageHeader(kernel, Kernel_BW);
-
 	IP_castImage(kernel, BW_IMAGE, Kernel_BW);
+
 	IP_copyImageHeader(I1, I1_BW);
 	IP_castImage(I1, BW_IMAGE, I1_BW);
 
@@ -273,15 +275,15 @@ void Correlation::gpuProgram(int pass)
 	int p = 0;
 	if (m_passthrough) {
 		m_passthrough = false;
+		m_gpu_processed = false;
 		m_GPU_out->setDisabled(true);
 		p = 1;
 	}
 	else {
+		m_gpu_processed = true;
 		m_passthrough = true;
 		m_GPU_out->setDisabled(false);
-
 		m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
-		glUniform1i(m_uniform[pass][KERNEL], 1);
 	}
 
 	glUniform1i(m_uniform[pass][PASS], p);
@@ -300,17 +302,13 @@ void Correlation::gpuProgram(int pass)
 	glUniform1i(m_uniform[pass][COLOR], m_color);
 	glUniform1i(m_uniform[pass][SAMPLER], 0);
 
-
-	//g_mainWindowP->glw()->m_setTemplate(m_uniform[pass][KERNEL]);
-	//glBindTexture(GL_TEXTURE_2D, *m_tex);
 }
 
 int Correlation::GPU_out()
 {
-	m_GPU_out->setDisabled(true);
 
 	// there is already image in  g_mainwindou destination. 
-	// h\get max position from that in x and y coordinate and send to setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, int yy) function
+	// get max position from that in x and y coordinate and send to setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, int yy) function
 	if (!m_gpu_processed) return 0;
 	if (m_kernel.isNull()) return 0;
 
@@ -321,14 +319,7 @@ int Correlation::GPU_out()
 
 	std::vector<int> val;
 	g_mainWindowP->glw()->get_img(PASS1, val, w, h);
-	//IP_castImage(, BW_IMAGE, m_Gpu_output);
 
-	//int w = m_Gpu_output->width();
-	//int h = m_Gpu_output->height();
-	//int total = w*h;
-
-
-	
 	int max_pos = 0;
 	int pos = 0;
 
@@ -339,21 +330,15 @@ int Correlation::GPU_out()
 
 	pos = total - 1;
 	int max = val[pos];
-	// loop through pixel dont have t look h-kh & w - kw place
-	/*for (int j = 0; j < h; ++j) {
-		for (int i =0; i < w; ++i) {
-			*/
 
+	// loop through pixel dont have t look h-kh & w - kw place
 	while (pos >= 0) {
-		if (max > val[pos]) {
+		if (max < val[pos]) {
 			max = val[pos];
 			max_pos = pos;
 		}
 		pos--;
 	}
-	/*	}
-	}
-*/
 
 	x = max_pos%w;
 	y = max_pos / w;
@@ -364,19 +349,21 @@ int Correlation::GPU_out()
 
 	// do correlation on grey
 	ImagePtr  Kernel_BW;
+	ImagePtr m_gpu_out;// = IP_allocImage(w, h, RGB_TYPE);
+
 	IP_castImage(m_kernel, BW_IMAGE, Kernel_BW);
 
 	// displlay output
 	if (!m_color) {
+		m_gpu_out = IP_allocImage(w, h, BW_TYPE);
 		setoutput(g_mainWindowP->imageSrc(), Kernel_BW, m_gpu_out, x, y);
 	}
 	else {
+		m_gpu_out = IP_allocImage(w, h, RGB_TYPE);
 		setoutput(g_mainWindowP->imageSrc(), m_kernel, m_gpu_out, x, y);
 	}
-	
-	//g_mainWindowP->setImageDst(m_gpu_out);
-	IP_IPtoQImage(m_gpu_out, m_image);
 
+	IP_IPtoQImage(m_gpu_out, m_image);
 	g_mainWindowP->glw()->setInTexture(m_image);
 	g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
 	g_mainWindowP->glw()->update();

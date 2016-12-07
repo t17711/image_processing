@@ -34,7 +34,7 @@ private:
 	QString		m_file;
 	QString		m_currentDir;
 	ImagePtr	m_kernel;
-	ImagePtr	m_gpu_out;
+	//ImagePtr	m_gpu_out;
 
 	int			m_width_i;	// input image width
 	int			m_height_i;	// input image height
