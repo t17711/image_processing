@@ -41,7 +41,7 @@ private:
 	int			m_width_k;	// input image width
 	int			m_height_k;	// input image height
 	GLuint *     m_tex;
-	QImage			m_image;
+	//QImage			m_image;
 	bool			m_color;
 	bool			m_gpu_processed;
 	bool				m_passthrough;

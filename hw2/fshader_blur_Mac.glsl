@@ -16,10 +16,9 @@ void main() {
 	int  w2  = u_Wsize / 2;
 	int  h2  = u_Hsize / 2;
 
-	for(int i=-h2; i<=h2; ++i){
-		for(int j=-w2; j<=w2; ++j)
-			{
-			avg += texture2D(u_Sampler, vec2(tc.x + i*u_WStep, tc.y + j*u_HStep)).rgb;
+	for(int j=-h2; j<=h2; ++j){
+		for(int i=-w2; i<=w2; ++i){
+			avg += texture2D(u_Sampler, vec2(tc.x + i*u_WStep, tc.y +j*u_HStep )).rgb;
 			}
 	}
 	avg = avg / (u_Wsize * u_Hsize);

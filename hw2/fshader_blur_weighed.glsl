@@ -17,9 +17,11 @@ void main() {
 
 	int sz = (u_Wsize*u_Hsize);
 
-	for(int i=-h2, ii =0; i<=h2; ++i){
-		for(int j=-w2; j<=w2; ++j,++ii){
-			avg += (texture2D(u_Sampler, vec2(tc.x + i*u_WStep, tc.y + j*u_HStep)).rgb*u_Weight[ii]);
+	int ii =0;
+	for(int j=-h2; j<=h2; ++j){
+		for(int i=-w2; i<=w2; ++i){
+			avg += (texture2D(u_Sampler, vec2(tc.x + i*u_WStep, tc.y +j*u_HStep )).rgb*u_Weight[ii]);
+			ii++;
 		}
 	}
 	//avg = avg / (u_Wsize * u_Hsize);

@@ -19,13 +19,14 @@ void main() {
 	float wt_hstep = 1.0/u_Hsize;
 	float wt_wstep = 1.0/u_Wsize;
 
-	for(int i=-h2, ii =0; i<=h2; ++i){
-		for(int j=-w2; j<=w2; ++j,++ii){
-			if (ii==sz) ii = 0;// just for security
-			avg += (texture2D(u_Sampler, vec2(tc.x + i*u_WStep, tc.y + j*u_HStep)).rgb*u_Weight[ii]);
+	int ii =0;
+	for(int j=-h2; j<=h2; ++j){
+		for(int i=-w2; i<=w2; ++i){
+			avg += (texture2D(u_Sampler, vec2(tc.x + i*u_WStep, tc.y +j*u_HStep )).rgb*u_Weight[ii]);
+			ii++;
 		}
 	}
-	//avg = avg / (u_Wsize * u_Hsize);
+
 	gl_FragColor = vec4(avg, 1.0);
 	
 }

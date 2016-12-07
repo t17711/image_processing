@@ -128,8 +128,8 @@ Correlation::load()
 	m_button->setText(f.fileName());
 	m_button->update();
 	
+	QImage m_image;
 	IP_IPtoQImage(m_kernel, m_image);
-
 
 	m_kernel_label->setPixmap(QPixmap::fromImage(m_image, Qt::AutoColor));
 	
@@ -169,7 +169,7 @@ void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, i
 			else
 				*p2++ = (*p1++) / 2;
 			x++;
-			x = x%m_width_i; // make it
+			x = x%m_width_i; // make it be in range
 		}
 
 		// go rest
@@ -216,6 +216,76 @@ void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 	else {
 		setoutput(I1, kernel, I2, xx, yy);
 	}
+}
+
+
+int Correlation::GPU_out()
+{
+
+	// there is already image in  g_mainwindou destination. 
+	// get max position from that in x and y coordinate and send to setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, int yy) function
+	if (!m_gpu_processed) return 0;
+	if (m_kernel.isNull()) return 0;
+
+	//ImagePtr m_Gpu_output;
+	int w = m_width_i;
+	int h = m_height_i;
+	int total = w*h;
+
+	std::vector<int> val;
+	g_mainWindowP->glw()->get_img(PASS1, val, w, h);
+
+	int max_pos = 0;
+	int pos = 0;
+
+	int x = 0;
+	int y = 0;
+	int kw = m_kernel->width();
+	int kh = m_kernel->height();
+
+	pos = total - 1;
+	int max = val[pos];
+
+	// loop through pixel dont have t look h-kh & w - kw place
+	while (pos >= 0) {
+		if (max < val[pos]) {
+			max = val[pos];
+			max_pos = pos;
+		}
+		pos--;
+	}
+
+	x = max_pos%w;
+	y = max_pos / w;
+
+
+	if (x > (w - kw)) x = w - kw;
+	if (y > (h - kh)) y = h - kh;
+
+	// do correlation on grey
+	ImagePtr  Kernel_BW;
+	ImagePtr m_gpu_out;// = IP_allocImage(w, h, RGB_TYPE);
+
+	
+	// displlay output
+	if (!m_color) {
+		IP_castImage(m_kernel, BW_IMAGE, Kernel_BW);
+		m_gpu_out = IP_allocImage(w, h, BW_TYPE);
+		setoutput(g_mainWindowP->imageSrc(), Kernel_BW, m_gpu_out, x, y);
+	}
+	else {
+		m_gpu_out = IP_allocImage(w, h, RGB_TYPE);
+		setoutput(g_mainWindowP->imageSrc(), m_kernel, m_gpu_out, x, y);
+	}
+
+	QImage m_image;
+	IP_IPtoQImage(m_gpu_out, m_image);
+
+	g_mainWindowP->glw()->setInTexture(m_image);
+	g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
+	g_mainWindowP->glw()->update();
+
+	return 1;
 }
 
 
@@ -272,101 +342,35 @@ void Correlation::gpuProgram(int pass)
 
 	glUseProgram(m_program[pass].programId());
 
-	int p = 0;
+
 	if (m_passthrough) {
 		m_passthrough = false;
 		m_gpu_processed = false;
 		m_GPU_out->setDisabled(true);
-		p = 1;
 	}
 	else {
 		m_gpu_processed = true;
 		m_passthrough = true;
 		m_GPU_out->setDisabled(false);
+		QImage m_image;
+		IP_IPtoQImage(m_kernel, m_image);
 		m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
 	}
 
-	glUniform1i(m_uniform[pass][PASS], p);
+	glUniform1i(m_uniform[pass][PASS], m_passthrough);
 
 
 	// pass values for texture
-	
+
 	glUniform1f(m_uniform[pass][WSTEP_S], (GLfloat) 1.0f / m_width_i);
 	glUniform1f(m_uniform[pass][HSTEP_S], (GLfloat) 1.0f / m_height_i);
-	
+
 	// pass values for correlate
 	glUniform1i(m_uniform[pass][HSIZE_K], h_size);
 	glUniform1i(m_uniform[pass][WSIZE_K], w_size);
-	glUniform1f(m_uniform[pass][WSTEP_K], (GLfloat) 1.0f / (2.0f*w_size));
-	glUniform1f(m_uniform[pass][HSTEP_K], (GLfloat) 1.0f / (2.0f*h_size));
+	glUniform1f(m_uniform[pass][WSTEP_K], (GLfloat) 1.0f / (w_size));
+	glUniform1f(m_uniform[pass][HSTEP_K], (GLfloat) 1.0f / (h_size));
 	glUniform1i(m_uniform[pass][COLOR], m_color);
 	glUniform1i(m_uniform[pass][SAMPLER], 0);
 
-}
-
-int Correlation::GPU_out()
-{
-
-	// there is already image in  g_mainwindou destination. 
-	// get max position from that in x and y coordinate and send to setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, int yy) function
-	if (!m_gpu_processed) return 0;
-	if (m_kernel.isNull()) return 0;
-
-	//ImagePtr m_Gpu_output;
-	int w = m_width_i;
-	int h = m_height_i;
-	int total = w*h;
-
-	std::vector<int> val;
-	g_mainWindowP->glw()->get_img(PASS1, val, w, h);
-
-	int max_pos = 0;
-	int pos = 0;
-
-	int x = 0;
-	int y = 0;
-	int kw = m_kernel->width();
-	int kh = m_kernel->height();
-
-	pos = total - 1;
-	int max = val[pos];
-
-	// loop through pixel dont have t look h-kh & w - kw place
-	while (pos >= 0) {
-		if (max < val[pos]) {
-			max = val[pos];
-			max_pos = pos;
-		}
-		pos--;
-	}
-
-	x = max_pos%w;
-	y = max_pos / w;
-
-
-	if (x > (w - kw)) x = w - kw;
-	if (y > (h - kh)) y = h - kh;
-
-	// do correlation on grey
-	ImagePtr  Kernel_BW;
-	ImagePtr m_gpu_out;// = IP_allocImage(w, h, RGB_TYPE);
-
-	IP_castImage(m_kernel, BW_IMAGE, Kernel_BW);
-
-	// displlay output
-	if (!m_color) {
-		m_gpu_out = IP_allocImage(w, h, BW_TYPE);
-		setoutput(g_mainWindowP->imageSrc(), Kernel_BW, m_gpu_out, x, y);
-	}
-	else {
-		m_gpu_out = IP_allocImage(w, h, RGB_TYPE);
-		setoutput(g_mainWindowP->imageSrc(), m_kernel, m_gpu_out, x, y);
-	}
-
-	IP_IPtoQImage(m_gpu_out, m_image);
-	g_mainWindowP->glw()->setInTexture(m_image);
-	g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
-	g_mainWindowP->glw()->update();
-
-	return 1;
 }

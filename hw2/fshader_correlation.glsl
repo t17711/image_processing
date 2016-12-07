@@ -27,11 +27,14 @@ void main() {
 	vec3 pt1 = vec3(0.0);
 	vec3 pt2 = vec3(0.0);
 
+	float I=0.0;
+	float T=0.0;
+	
 	if (u_passthrough == 0 ){
 		vec3 s= vec3(0.3f,0.6f,0.1f);
 
-		for(int i = 0; i< u_Hsize_k; i++){
-			for (int j =0; j < u_Wsize_k; j++){
+		for(int j= 0; j< u_Hsize_k; j++){
+			for (int i =0; i < u_Wsize_k; i++){
 
 
 				//	CROSS_CORR (cross correlation):
@@ -39,18 +42,25 @@ void main() {
 				//			 --------------------------------
 				//			 sqrt{ sum of {I(x-u,y-v)^2}}
 
-				pt1 = s*(texture2D(u_Sampler,vec2(tc.x + i*u_WStep_s, tc.y + j *u_HStep_s)).rgb);
-				pt2 = s*(texture2D(u_Kernel,vec2(i*u_WStep_k, j *u_HStep_k)).rgb);
-				
-				float I = pt1.r+pt1.g+pt1.b;
-				float T = pt2.r+pt2.g+pt2.b;
+				pt1 = s*(texture2D(u_Sampler,vec2(tc.x + i*u_WStep_s, tc.y + j*u_HStep_s)).rgb);
+				pt2 = s*(texture2D(u_Kernel,vec2(i*u_WStep_k, j*u_HStep_k)).rgb);
+			
+				if(u_Color == 0){
+					I = pt1.r+pt1.g+pt1.b;
+					T = pt2.r+pt2.g+pt2.b;
+				}
 
+				else{
+					I = pt1.r;
+					T = pt2.r;
+				}
 				sum1 += T*I;
 				sum2 += pow(I,2);	
 			}
 		}
 
-		sum1 = sum1*inversesqrt(sum2)*u_WStep_k;;
+		if(sum1==0) sum1 =1.0f;
+		sum1 = sum1/sqrt(sum2);
 	
 		gl_FragColor = vec4(sum1,sum1,sum1,sum1);
 	}
