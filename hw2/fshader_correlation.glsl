@@ -29,6 +29,7 @@ void main() {
 
 	float I=0.0;
 	float T=0.0;
+	float Q=0.0;
 	
 	if (u_passthrough == 0 ){
 		vec3 s= vec3(0.3f,0.6f,0.1f);
@@ -45,6 +46,7 @@ void main() {
 				pt1 = s*(texture2D(u_Sampler,vec2(tc.x + i*u_WStep_s, tc.y + j*u_HStep_s)).rgb);
 				pt2 = s*(texture2D(u_Kernel,vec2(i*u_WStep_k, j*u_HStep_k)).rgb);
 			
+				
 				if(u_Color == 0){
 					I = pt1.r+pt1.g+pt1.b;
 					T = pt2.r+pt2.g+pt2.b;
@@ -54,14 +56,16 @@ void main() {
 					I = pt1.r;
 					T = pt2.r;
 				}
+
+				Q+=(pow(T,2));
 				sum1 += T*I;
 				sum2 += pow(I,2);	
 			}
 		}
 
-		if(sum1==0) sum1 =1.0f;
 		sum1 = sum1/sqrt(sum2);
-	
+		sum1 = sum1/sqrt(Q);
+		
 		gl_FragColor = vec4(sum1,sum1,sum1,sum1);
 	}
 	else{

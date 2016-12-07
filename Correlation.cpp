@@ -243,16 +243,16 @@ int Correlation::GPU_out()
 	int kw = m_kernel->width();
 	int kh = m_kernel->height();
 
-	pos = total - 1;
+	pos = 0;
 	int max = val[pos];
 
 	// loop through pixel dont have t look h-kh & w - kw place
-	while (pos >= 0) {
+	while (pos < total) {
 		if (max < val[pos]) {
 			max = val[pos];
 			max_pos = pos;
 		}
-		pos--;
+		pos++;
 	}
 
 	x = max_pos%w;
@@ -357,7 +357,7 @@ void Correlation::gpuProgram(int pass)
 		m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
 	}
 
-	glUniform1i(m_uniform[pass][PASS], m_passthrough);
+	glUniform1i(m_uniform[pass][PASS], !m_passthrough);
 
 
 	// pass values for texture

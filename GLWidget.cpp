@@ -554,7 +554,7 @@ GLWidget::get_img(int pass, std::vector<int>& image, int w, int h)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);	
 
-	for (int i = 0; i <total ; ++i) image.push_back(p[i]);
+	for (int i = total-1; i >=0 ; --i) image.push_back(p[i]);
 	
 	free(p);
 	
