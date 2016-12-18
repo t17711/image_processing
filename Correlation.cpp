@@ -7,18 +7,24 @@
 #include "hw2/IPconvolve.cpp"
 
 extern MainWindow *g_mainWindowP;
-enum { WSTEP_S, HSTEP_S, WSIZE_K, HSIZE_K, WSTEP_K, HSTEP_K, OFFSET, COLOR,SAMPLER, KERNEL,PASS };
+enum { WSTEP_S, HSTEP_S, WSIZE_K, HSIZE_K, WSTEP_K, HSTEP_K, OFFSET, COLOR,SAMPLER, KERNEL,PASS,NORMALIZER };
 
 Correlation::Correlation(QWidget *parent) : ImageFilter(parent)
 {
 	m_kernel = NULL;
+	
 	m_passthrough = false;
 	m_gpu_processed = false;
-	
 	
 }
 
 
+void Correlation::GPU_initialize()
+{
+	m_passthrough = false;
+	m_gpu_processed = false;
+	m_GPU_out->setDisabled(true);
+}
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // correlation::controlPanel:
 //
@@ -76,9 +82,7 @@ bool Correlation::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 
 	// convolve image
 	if (!(gpuFlag && m_shaderFlag)) {
-		m_passthrough = false;
-		m_gpu_processed = false;
-		m_GPU_out->setDisabled(true);
+		GPU_initialize();
 		corr(I1, m_kernel, I2);
 	}
 	else {
@@ -96,8 +100,7 @@ bool Correlation::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 int
 Correlation::load()
 {
-	m_gpu_processed = false;
-	m_passthrough = false;
+	GPU_initialize();
 	QFileDialog dialog(this);
 
 	// open the last known working directory
@@ -120,6 +123,8 @@ Correlation::load()
 	m_currentDir = f.absolutePath();
 
 	// read kernel
+	if (m_kernel != NULL) IP_clearImage(m_kernel);
+
 	m_kernel = IP_readImage(qPrintable(m_file));
 	m_width_k = m_kernel->width();
 	m_height_k = m_kernel->height();
@@ -130,12 +135,8 @@ Correlation::load()
 	
 	QImage m_image;
 	IP_IPtoQImage(m_kernel, m_image);
-
-	m_kernel_label->setPixmap(QPixmap::fromImage(m_image, Qt::AutoColor));
+	m_kernel_label->setPixmap(QPixmap::fromImage(m_image, Qt::AutoColor).scaled(m_kernel_label->height(), m_kernel_label->width()));
 	
-	//m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
-	//	g_mainWindowP->glw()->m_setTemplate(m_uniform[PASS1][KERNEL]);
-
 	g_mainWindowP->preview();
 
 		return 1;
@@ -209,13 +210,18 @@ void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 		val = IP_correlation(I1, Kernel_BW, 1, 1, xx, yy);
 	}
 	
-	// displlay output
+	// display output
 	if (!m_color) {
 		setoutput(I1, Kernel_BW, I2, xx, yy);
 	}
 	else {
 		setoutput(I1, kernel, I2, xx, yy);
 	}
+
+	QImage t;
+	IP_IPtoQImage(I1, t);
+	g_mainWindowP->glw()->setInTexture(t);
+
 }
 
 
@@ -232,28 +238,27 @@ int Correlation::GPU_out()
 	int h = m_height_i;
 	int total = w*h;
 
-	std::vector<int> val;
-	g_mainWindowP->glw()->get_img(PASS1, val, w, h);
+	
+	uchar* convolve_values = (uchar*)malloc(sizeof(uchar)*total);
+	g_mainWindowP->glw()->get_img(PASS1, convolve_values, w, h);
 
 	int max_pos = 0;
-	int pos = 0;
 
 	int x = 0;
 	int y = 0;
 	int kw = m_kernel->width();
 	int kh = m_kernel->height();
 
-	pos = 0;
-	int max = val[pos];
-
-	// loop through pixel dont have t look h-kh & w - kw place
-	while (pos < total) {
-		if (max < val[pos]) {
-			max = val[pos];
-			max_pos = pos;
-		}
-		pos++;
+	uchar max = convolve_values[0];
+	for (int i = 0; i<total; i++) {
+		int v = convolve_values[i];
+		if (max < convolve_values[i]) {
+			max = convolve_values[i];
+			max_pos = i;
+			}
 	}
+	free(convolve_values);
+
 
 	x = max_pos%w;
 	y = max_pos / w;
@@ -285,8 +290,11 @@ int Correlation::GPU_out()
 	g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
 	g_mainWindowP->glw()->update();
 
+	GPU_initialize();
 	return 1;
 }
+
+
 
 
 void Correlation::initShader()
@@ -310,6 +318,7 @@ void Correlation::initShader()
 	uniforms["u_Kernel"] = KERNEL;
 	uniforms["u_Color"] = COLOR;
 	uniforms["u_passthrough"] = PASS;
+	uniforms["u_normalizor"] = NORMALIZER;
 	QString v_name = ":/vshader_passthrough";
 	QString f_name = ":/hw2/fshader_correlation";
 
@@ -340,13 +349,13 @@ void Correlation::gpuProgram(int pass)
 	if (w_size % 2 == 0) ++w_size;
 	if (h_size % 2 == 0) ++h_size;
 
+	
+
 	glUseProgram(m_program[pass].programId());
 
 
 	if (m_passthrough) {
-		m_passthrough = false;
-		m_gpu_processed = false;
-		m_GPU_out->setDisabled(true);
+		GPU_initialize();
 	}
 	else {
 		m_gpu_processed = true;
@@ -354,7 +363,24 @@ void Correlation::gpuProgram(int pass)
 		m_GPU_out->setDisabled(false);
 		QImage m_image;
 		IP_IPtoQImage(m_kernel, m_image);
+	
 		m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
+		
+		ImagePtr c;
+		IP_castImage(m_kernel, BW_IMAGE, c);	
+		ChannelPtr<uchar> p;
+		int type;
+		IP_getChannel(c, 0, p, type);
+		int total = w_size*h_size;
+		float normalizer = 0.0f;
+		for (int i = 0; i<total; i++) {
+			normalizer += pow((float)p[i] / 255.0f,2);
+		}
+
+		IP_clearImage(c);
+		normalizer = sqrt(normalizer);
+		glUniform1f(m_uniform[pass][NORMALIZER], normalizer);
+
 	}
 
 	glUniform1i(m_uniform[pass][PASS], !m_passthrough);

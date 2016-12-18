@@ -45,7 +45,7 @@ public:
 	void	setDstImage(int);
 	GLuint*	setTemplateTexture(QImage &);
 	void			m_setTemplate(GLint addr);
-	void  get_img(int, std::vector<int>&,int,int);
+	void  get_img(int, uchar*,int,int);
 
 protected:
 

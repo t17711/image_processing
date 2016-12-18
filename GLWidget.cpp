@@ -501,7 +501,6 @@ GLWidget::setDstImage(int pass)
 	g_mainWindowP->setImageDst(ipImage);
 	glViewport(0, 0, m_winW, m_winH);
 
-
 }
 
 GLuint* GLWidget::setTemplateTexture(QImage & image)
@@ -537,26 +536,33 @@ void GLWidget::m_setTemplate(GLint addr)
 
 
 void
-GLWidget::get_img(int pass, std::vector<int>& image, int w, int h)
+GLWidget::get_img(int pass, uchar* out,int w,int h)
 {
 
 
 	glViewport(0, 0, w, h);
-
-
+	ImagePtr I = IP_allocImage(3 * w, h, BW_TYPE);
+	ChannelPtr<uchar> p = I[0];
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
+	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, &p[0]);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// uninterleave image
+	ImagePtr ipImage = IP_allocImage(w, h, RGB_TYPE);
+	IP_uninterleave(I, ipImage);
+
+	int type;
+	IP_getChannel(ipImage, 0, p, type);
 
 	int total = w*h;
-	int* p = (int*)(malloc(total * sizeof(int)));
-
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
-	glReadPixels(0, 0, w, h, GL_RED, GL_INT, p);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);	
-
-	for (int i = total-1; i >=0 ; --i) image.push_back(p[i]);
 	
-	free(p);
 	
+//	out = (uchar*)malloc(sizeof(uchar)*total);
+	for (int i = 0; i < total; ++i) {
+		out[i] = p[total-i-1];
+	}
+
+	IP_clearImage(ipImage);
+	IP_clearImage(I);
 	glViewport(0, 0, m_winW, m_winH);
+
 }

@@ -21,6 +21,7 @@ public:
 protected slots:
 	int		load();
 	int		GPU_out();
+	void GPU_initialize();
 
 
 private:
