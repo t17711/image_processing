@@ -147,6 +147,9 @@ void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, i
 	IP_copyImageHeader(I1, I2);
 	int total = m_width_i * m_height_i;
 
+	if (xx > m_width_i - m_width_k) xx = m_width_i - m_width_k;
+	if (xx > m_height_i - m_height_k) yy = m_height_i - m_height_k;
+
 	int type;
 	ChannelPtr<uchar> p1, p1_2, p2, p3, endd;
 	for (int ch = 0; IP_getChannel(I1, ch, p1, type); ch++) {

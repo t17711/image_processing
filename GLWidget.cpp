@@ -580,10 +580,10 @@ GLWidget::get_img(int pass,int &xx, int&yy)
 	for (int i = 0; i < h1; i++) {
 		for (int j = 0; j < w1; j++) {
 			uchar v = p1[j+i*w1];
-			if (max <= v) {
+			if (max < v) {
 				max = v;
 				x = j;
-				y = h1-i;
+				y = i;
 
 			}
 		}
