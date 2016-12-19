@@ -490,7 +490,7 @@ GLWidget::setDstImage(int pass)
 {
 
 	glViewport(0, 0, m_imageW, m_imageH);
-	ImagePtr I = IP_allocImage(3*m_imageW, m_imageH, BW_TYPE);
+	ImagePtr I = IP_allocImage(3*m_imageW, 3*m_imageH, BW_TYPE);
 	ChannelPtr<uchar> p = I[0];
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
 	glReadPixels(0, 0, m_imageW, m_imageH, GL_RGB, GL_UNSIGNED_BYTE, &p[0]);
@@ -509,11 +509,11 @@ GLuint* GLWidget::setTemplateTexture(QImage & image)
 	QImage qImage = QGLWidget::convertToGLFormat(image);
 
 	// init vars
-	m_imageW = qImage.width();
-	m_imageH = qImage.height();
+	int i = qImage.width();
+	int j = qImage.height();
 
 	// bind texture
-	glActiveTexture(GL_TEXTURE0+1);
+	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_TemplateTexture);
 
 	// set the texture parameters
@@ -522,7 +522,7 @@ GLuint* GLWidget::setTemplateTexture(QImage & image)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// upload to GPU
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_imageW, m_imageH, 0, GL_RGBA, GL_UNSIGNED_BYTE, qImage.bits());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, i, j, 0, GL_RGBA, GL_UNSIGNED_BYTE, qImage.bits());
 	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	return &m_TemplateTexture;
@@ -536,33 +536,63 @@ void GLWidget::m_setTemplate(GLint addr)
 
 
 void
-GLWidget::get_img(int pass, uchar* out,int w,int h)
+GLWidget::get_img(int pass,int &xx, int&yy)
 {
 
 
-	glViewport(0, 0, w, h);
-	ImagePtr I = IP_allocImage(3 * w, h, BW_TYPE);
-	ChannelPtr<uchar> p = I[0];
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
-	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, &p[0]);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	// uninterleave image
-	ImagePtr ipImage = IP_allocImage(w, h, RGB_TYPE);
-	IP_uninterleave(I, ipImage);
-
+	//glViewport(0, 0, m_winW, m_winH);
+	//ImagePtr I = IP_allocImage(3 * m_winW,3* m_winH, BW_TYPE);
+	//ChannelPtr<uchar> p = I[0];
+	//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
+	//glReadPixels(0, 0, m_winW, m_winH, GL_RGB, GL_UNSIGNED_BYTE, &p[0]);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//// uninterleave image
+	//ImagePtr ipImage = IP_allocImage(m_winW, m_winH, RGB_TYPE);
+	//IP_uninterleave(I, ipImage);
+	//
+	
+	// flip output image
+	ImagePtr flipped;
+	ImagePtr ipImage = g_mainWindowP->imageDst();
+	IP_copyImageHeader(ipImage, flipped);
 	int type;
-	IP_getChannel(ipImage, 0, p, type);
+	int w1 = ipImage->width();
+	int h1 = ipImage->height();
+	int total = w1*h1;
+	ChannelPtr<uchar> p1, p2, endd;
 
-	int total = w*h;
-	
-	
-//	out = (uchar*)malloc(sizeof(uchar)*total);
-	for (int i = 0; i < total; ++i) {
-		out[i] = p[total-i-1];
+	for (int ch = 0; IP_getChannel(ipImage, ch, p1, type); ch++) {
+		for (int i = 1; i <= h1; i++) { // do row by row flip, so loop by col
+			IP_getChannel(flipped, ch, p2, type);
+			p2 += (total - i*w1); // so go to the begining of the last row for 1st step, then 2nd last row and so on
+
+			for (int j = 0; j < w1; j++) {// copy row
+				*p2++ = *p1++; // copy 1st row into last row
+			}
+		}
 	}
 
-	IP_clearImage(ipImage);
-	IP_clearImage(I);
+	int t;
+	IP_getChannel(flipped, 0, p1, t);
+
+	uchar max = 0;
+	int x = 0, y = 0;
+	for (int i = 0; i < h1; i++) {
+		for (int j = 0; j < w1; j++) {
+			uchar v = p1[j+i*w1];
+			if (max <= v) {
+				max = v;
+				x = j;
+				y = h1-i;
+
+			}
+		}
+	}
+
+
+		xx = x;
+		yy = y;
+
 	glViewport(0, 0, m_winW, m_winH);
 
 }

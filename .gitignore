@@ -3,7 +3,6 @@
 ################################################################################
 
 /debug
-/.vs/qip/v14
 /obj
 /release
 /qip.vcxproj.user
@@ -11,3 +10,12 @@
 /qip.VC.db
 /qip.sln
 /qip.pro.user
+!**.cpp
+!**.h
+!**.glsl
+/.vs
+/.vs**
+**.sln
+**.db
+**.vcxproj**
+/moc**

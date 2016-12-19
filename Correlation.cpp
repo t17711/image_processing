@@ -148,8 +148,6 @@ void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, i
 	int total = m_width_i * m_height_i;
 
 	int type;
-	int x = 0;
-	int y = 0;
 	ChannelPtr<uchar> p1, p1_2, p2, p3, endd;
 	for (int ch = 0; IP_getChannel(I1, ch, p1, type); ch++) {
 		p1_2 = p1;
@@ -162,7 +160,7 @@ void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, i
 
 		// go upto m_width_i * m_kernel_height row
 		int x = 0;
-		for (endd += (m_height_k-1)*m_width_i; p1 < endd;)
+		for (endd += (m_height_k-1)*m_width_i; p1 < endd && *p3!=NULL && *p1!=NULL;)
 		{
 			if (xx <= x && x < (xx + m_width_k)){
 				*p2++ = (*p1++) / 2 + (*p3++) / 2;
@@ -238,34 +236,13 @@ int Correlation::GPU_out()
 	int h = m_height_i;
 	int total = w*h;
 
+	int x;
+	int y;
+
 	
-	uchar* convolve_values = (uchar*)malloc(sizeof(uchar)*total);
-	g_mainWindowP->glw()->get_img(PASS1, convolve_values, w, h);
-
-	int max_pos = 0;
-
-	int x = 0;
-	int y = 0;
-	int kw = m_kernel->width();
-	int kh = m_kernel->height();
-
-	uchar max = convolve_values[0];
-	for (int i = 0; i<total; i++) {
-		int v = convolve_values[i];
-		if (max < convolve_values[i]) {
-			max = convolve_values[i];
-			max_pos = i;
-			}
-	}
-	free(convolve_values);
+	g_mainWindowP->glw()->get_img(PASS1,x,y);
 
 
-	x = max_pos%w;
-	y = max_pos / w;
-
-
-	if (x > (w - kw)) x = w - kw;
-	if (y > (h - kh)) y = h - kh;
 
 	// do correlation on grey
 	ImagePtr  Kernel_BW;
