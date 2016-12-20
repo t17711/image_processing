@@ -142,6 +142,7 @@ Correlation::load()
 		return 1;
 }
 
+// this function overlaps the kernel image to input inage, both at half intensity so they look full intensity at the place of overlap
 void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, int yy)
 {
 	IP_copyImageHeader(I1, I2);
@@ -157,11 +158,13 @@ void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, i
 		int type;
 		IP_getChannel(kernel, ch, p3, type);
 		IP_getChannel(I2, ch, p2, type);
+		// now for each channel copy all row and col
+		// wherever the input inage overlaps copy both image else only copy 1 image
 
 		for (int row = 0; row < h; row++) {
 			for (int col = 0; col < w; col++) {
 				if (row >= yy && row < yy + m_height_k && col >= xx && col < xx + m_width_k) {
-					if (row == yy) *p2 = 255;
+					if (row == yy) *p2 = 255; // get white border
 					else if (col == xx) *p2 = 255;
 					else if (row == yy + m_height_k-1) *p2 = 255;
 					else if (col == xx + m_width_k-1) *p2 = 255;
@@ -181,6 +184,8 @@ void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, i
 
 }
 
+//this just calls gpu verison of correlarion
+//i just make sure that both image are of same color when I send them for overlap
 void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 {
 	// if the coordinate falls between (xx, yy), (xx+kernel_width, yy +yernel_height)
@@ -202,7 +207,7 @@ void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 	IP_copyImageHeader(kernel, Kernel_BW);
 	IP_castImage(kernel, BW_IMAGE, Kernel_BW);
 
-
+	// if color then make both grey to get correltion
 	if (m_color) {
 		IP_copyImageHeader(I1, I1_BW);
 		IP_castImage(I1, BW_IMAGE, I1_BW);
@@ -226,10 +231,9 @@ void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 
 }
 
-
+// this just reads the correlation values on screen from gpu processing and creates overlapped image
 int Correlation::GPU_out()
 {
-
 	// there is already image in  g_mainwindou destination. 
 	// get max position from that in x and y coordinate and send to setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, int yy) function
 	if (!m_gpu_processed) return 0;
@@ -243,7 +247,7 @@ int Correlation::GPU_out()
 	int x;
 	int y;
 
-	
+	// get the coordinates, i wrote this function
 	g_mainWindowP->glw()->get_img(PASS1,x,y);
 
 	// do correlation on grey
@@ -251,7 +255,7 @@ int Correlation::GPU_out()
 	ImagePtr m_gpu_out;// = IP_allocImage(w, h, RGB_TYPE);
 
 	
-	// displlay output
+	// get over lapped image
 	if (!m_color) {
 		IP_castImage(m_kernel, BW_IMAGE, Kernel_BW);
 		m_gpu_out = IP_allocImage(w, h, BW_TYPE);
@@ -265,6 +269,7 @@ int Correlation::GPU_out()
 	QImage m_image;
 	IP_IPtoQImage(m_gpu_out, m_image);
 
+	// display
 	g_mainWindowP->glw()->setInTexture(m_image);
 	g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
 	g_mainWindowP->glw()->update();

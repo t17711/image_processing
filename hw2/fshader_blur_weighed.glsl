@@ -24,7 +24,6 @@ void main() {
 			ii++;
 		}
 	}
-	//avg = avg / (u_Wsize * u_Hsize);
 	gl_FragColor = vec4(avg, 1.0);
 	
 }

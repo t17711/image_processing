@@ -145,7 +145,7 @@ GLWidget::setInTexture(QImage &image)
 	m_imageH = qImage.height();
 
 	// bind texture
-	glActiveTexture(GL_TEXTURE0 + 0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_inTexture);
 
 	// set the texture parameters
@@ -175,7 +175,7 @@ GLWidget::setOutTexture(QImage &image) {
 	m_imageH = qImage.height();
 
 	// bind texture
-	glActiveTexture(GL_TEXTURE0 + 0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_outTexture);
 
 	// set the texture parameters
@@ -193,7 +193,7 @@ GLWidget::allocateTextureFBO(int w, int h)
 {
 
 	// bind texture
-	glActiveTexture(GL_TEXTURE0 + 0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[PASS1]);
 	//glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, m_texture_fbo[PASS1]);
@@ -539,26 +539,12 @@ void
 GLWidget::get_img(int pass,int &xx, int&yy)
 {
 
-
-	//glViewport(0, 0, m_winW, m_winH);
-	//ImagePtr I = IP_allocImage(3 * m_winW,3* m_winH, BW_TYPE);
-	//ChannelPtr<uchar> p = I[0];
-	//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo[pass]);
-	//glReadPixels(0, 0, m_winW, m_winH, GL_RGB, GL_UNSIGNED_BYTE, &p[0]);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//// uninterleave image
-	//ImagePtr ipImage = IP_allocImage(m_winW, m_winH, RGB_TYPE);
-	//
-	//IP_uninterleave(I, ipImage);
-	
-	
-	// flip output image
-
 	ImagePtr flipped, flipped2;
+
+	// get the correlation data stored in dest image, in BW
 	IP_castImage(g_mainWindowP->imageDst(), BW_IMAGE, flipped2);
-//	ImagePtr ipImage = g_mainWindowP->imageDst();
 
-
+	// create new image to flip
 	IP_copyImageHeader(flipped2, flipped);
 
 	int type;
@@ -567,6 +553,7 @@ GLWidget::get_img(int pass,int &xx, int&yy)
 	int total = w1*h1;
 	ChannelPtr<uchar> p1, p2, endd;
 
+	// flip the rows of image
 	IP_getChannel(flipped2, 0, p1, type);
 	for (int i = 1; i <= h1; i++) { // do row by row flip, so loop by col
 		IP_getChannel(flipped, 0, p2, type);
@@ -576,7 +563,7 @@ GLWidget::get_img(int pass,int &xx, int&yy)
 		}
 	}
 	
-
+	// now get the max value in correlation
 	int t;
 	IP_getChannel(flipped, 0, p1, t);
 
@@ -587,14 +574,14 @@ GLWidget::get_img(int pass,int &xx, int&yy)
 			uchar v = p1[j+i*w1];
 			if (max < v) {
 				max = v;
-				x = w1-j;
-				y = i;
+				x = j; // this is maximum row pos
+				y = i; // max col pos
 
 			}
 		}
 	}
 
-
+		// return value
 		xx = x;
 		yy = y;
 
