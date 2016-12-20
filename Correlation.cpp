@@ -13,7 +13,7 @@ Correlation::Correlation(QWidget *parent) : ImageFilter(parent)
 {
 	m_kernel = NULL;
 	
-	m_passthrough = false;
+	m_filter = false;
 	m_gpu_processed = false;
 	
 }
@@ -21,7 +21,7 @@ Correlation::Correlation(QWidget *parent) : ImageFilter(parent)
 
 void Correlation::GPU_initialize()
 {
-	m_passthrough = false;
+	m_filter = false;
 	m_gpu_processed = false;
 	m_GPU_out->setDisabled(true);
 }
@@ -136,7 +136,24 @@ Correlation::load()
 	QImage m_image;
 	IP_IPtoQImage(m_kernel, m_image);
 	m_kernel_label->setPixmap(QPixmap::fromImage(m_image, Qt::AutoColor).scaled(m_kernel_label->height(), m_kernel_label->width()));
+	(g_mainWindowP->glw()->setTemplateTexture(m_image));
 	
+
+	ChannelPtr<uchar> p;;
+	int type;
+	
+	int total = m_width_k*m_height_k;
+
+	m_normalizer = 0.0f;
+
+	int ch;
+	for (ch = 0; IP_getChannel(m_kernel, ch, p, type); ch++) {
+		for (int i = 0; i < total; i++) {
+			m_normalizer += ((float)p[i] / 255.0f * (float)p[i] / 255.0f);
+		}
+	}
+	
+	m_normalizer = sqrt(m_normalizer/ch);
 	g_mainWindowP->preview();
 
 		return 1;
@@ -244,8 +261,7 @@ int Correlation::GPU_out()
 	int h = m_height_i;
 	int total = w*h;
 
-	int x;
-	int y;
+	int x,y;
 
 	// get the coordinates, i wrote this function
 	g_mainWindowP->glw()->get_img(PASS1,x,y);
@@ -258,11 +274,11 @@ int Correlation::GPU_out()
 	// get over lapped image
 	if (!m_color) {
 		IP_castImage(m_kernel, BW_IMAGE, Kernel_BW);
-		m_gpu_out = IP_allocImage(w, h, BW_TYPE);
+		//m_gpu_out = IP_allocImage(w, h, BW_TYPE);
 		setoutput(g_mainWindowP->imageSrc(), Kernel_BW, m_gpu_out, x, y);
 	}
 	else {
-		m_gpu_out = IP_allocImage(w, h, RGB_TYPE);
+		//m_gpu_out = IP_allocImage(w, h, RGB_TYPE);
 		setoutput(g_mainWindowP->imageSrc(), m_kernel, m_gpu_out, x, y);
 	}
 
@@ -274,7 +290,6 @@ int Correlation::GPU_out()
 	g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
 	g_mainWindowP->glw()->update();
 
-	GPU_initialize();
 	return 1;
 }
 
@@ -301,7 +316,7 @@ void Correlation::initShader()
 	uniforms["u_Sampler"] = SAMPLER;
 	uniforms["u_Kernel"] = KERNEL;
 	uniforms["u_Color"] = COLOR;
-	uniforms["u_passthrough"] = PASS;
+	uniforms["u_filter"] = PASS;
 	uniforms["u_normalizor"] = NORMALIZER;
 	QString v_name = ":/vshader_passthrough";
 	QString f_name = ":/hw2/fshader_correlation";
@@ -332,47 +347,20 @@ void Correlation::gpuProgram(int pass)
 	int h_size = m_height_k;
 	if (w_size % 2 == 0) ++w_size;
 	if (h_size % 2 == 0) ++h_size;
-
-	
-
-	glUseProgram(m_program[pass].programId());
-
-
-	if (m_passthrough) {
+	if (m_filter) {
 		GPU_initialize();
 	}
 	else {
 		m_gpu_processed = true;
-		m_passthrough = true;
+		m_filter = true;
 		m_GPU_out->setDisabled(false);
-		QImage m_image;
-		IP_IPtoQImage(m_kernel, m_image);
-
-		ImagePtr c;
-		IP_castImage(m_kernel, BW_IMAGE, c);
-	
-		m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
-		
-		ChannelPtr<uchar> p;
-		int type;
-		IP_getChannel(c, 0, p, type);
-		int total = w_size*h_size;
-		float normalizer = 0.0f;
-		for (int i = 0; i<total; i++) {
-			normalizer += pow((float)p[i] / 255.0f,2);
-		}
-
-		IP_clearImage(c);
-		normalizer = sqrt(normalizer);
-		glUniform1f(m_uniform[pass][NORMALIZER], normalizer);
-
 	}
-
-	glUniform1i(m_uniform[pass][PASS], !m_passthrough);
-
-
+	
+	
+	glUseProgram(m_program[pass].programId());
+	glUniform1f(m_uniform[pass][NORMALIZER], m_normalizer);
+	glUniform1i(m_uniform[pass][PASS], m_filter);
 	// pass values for texture
-
 	glUniform1f(m_uniform[pass][WSTEP_S], (GLfloat) 1.0f / m_width_i);
 	glUniform1f(m_uniform[pass][HSTEP_S], (GLfloat) 1.0f / m_height_i);
 
@@ -383,5 +371,6 @@ void Correlation::gpuProgram(int pass)
 	glUniform1f(m_uniform[pass][HSTEP_K], (GLfloat) 1.0f / (h_size));
 	glUniform1i(m_uniform[pass][COLOR], m_color);
 	glUniform1i(m_uniform[pass][SAMPLER], 0);
+	glUniform1i(m_uniform[pass][KERNEL], 2);
 
 }

@@ -43,8 +43,7 @@ public:
 	void	initShader(QGLShaderProgram &, QString, QString, UniformMap &, int *);
 	void	applyFilterGPU(int);
 	void	setDstImage(int);
-	GLuint*	setTemplateTexture(QImage &);
-	void			m_setTemplate(GLint addr);
+	void	setTemplateTexture(QImage &);
 	void  get_img(int,int&,int&);
 
 protected:

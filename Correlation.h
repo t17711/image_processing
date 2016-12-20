@@ -45,7 +45,8 @@ private:
 	//QImage			m_image;
 	bool			m_color;
 	bool			m_gpu_processed;
-	bool				m_passthrough;
+	bool				m_filter;
+	float				m_normalizer;
 };
 
 #endif

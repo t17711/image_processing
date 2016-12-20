@@ -14,22 +14,22 @@ uniform float	  u_HStep_k;
 uniform	sampler2D u_Sampler;
 uniform	sampler2D u_Kernel; 
 uniform int u_Color;
-uniform int u_passthrough;
+uniform int u_filter;
 uniform float u_normalizor;
 
 void main() {
 
 	vec2 tc  = v_TexCoord;
 	
-	float sum1 = (0.0f);
-	float sum2 = (0.0f);
+	vec3 sum1 = vec3(0.0f);
+	vec3 sum2 = vec3(0.0f);
 
 	
 	vec3 pt1 = vec3(0.0);
 	vec3 pt2 = vec3(0.0);
 
 	
-	if (u_passthrough == 0 ){
+	if (u_filter == 1){
 		vec3 s= vec3(0.2126f,0.7152f,0.0722f);
 
 		for(int j= 0; j< u_Hsize_k; j++){
@@ -44,20 +44,20 @@ void main() {
 				pt1 = (texture2D(u_Sampler,vec2(tc.x + i*u_WStep_s, tc.y + j*u_HStep_s)).rgb);
 				pt2 = (texture2D(u_Kernel,vec2(i*u_WStep_k, j*u_HStep_k)).rgb);
 			
-				float t =(u_Color==0)?pt1.r:dot(pt1,s);
-				sum1 += t*(dot(pt2,s)); // multiply with grey template
-				sum2 += (pow(t,2));	
+				
+				sum1 += pt1*pt2;
+				sum2 += pt1*pt1;
 			}
 		}
 
 
 		
-		float out1 = 0.0f;
-		
-		out1 = sum1/sqrt(sum2);
+		float out1 = (dot(sum1/sqrt(sum2)/u_normalizor,s));
 		
 
-		gl_FragColor = vec4(out1/u_normalizor);
+		gl_FragColor = vec4(vec3(out1),1.0f);	
+		//gl_FragColor = (texture2D(u_Kernel,v_TexCoord));
+
 	}
 	else{
 			gl_FragColor = (texture2D(u_Sampler,v_TexCoord));
