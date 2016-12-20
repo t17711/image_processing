@@ -28,12 +28,14 @@ void main() {
 	vec3 pt1 = vec3(0.0);
 	vec3 pt2 = vec3(0.0);
 
+	int  w2  = u_Wsize_k/2;
+    int  h2  = u_Hsize_k/2;
 	
 	if (u_filter == 1){
 		vec3 s= vec3(0.2126f,0.7152f,0.0722f);
 
-		for(int j= 0; j< u_Hsize_k; j++){
-			for (int i =0; i < u_Wsize_k; i++){
+		for(int j= -h2; j< h2; j++){
+			for (int i =-w2; i < w2; i++){
 
 
 				//	CROSS_CORR (cross correlation):
@@ -42,7 +44,7 @@ void main() {
 				//			 sqrt{ sum of {I(x-u,y-v)^2}}
 
 				pt1 = (texture2D(u_Sampler,vec2(tc.x + i*u_WStep_s, tc.y + j*u_HStep_s)).rgb);
-				pt2 = (texture2D(u_Kernel,vec2(i*u_WStep_k, j*u_HStep_k)).rgb);
+				pt2 = (texture2D(u_Kernel,vec2(0.5+i*u_WStep_k,0.5+ j*u_HStep_k)).rgb);
 			
 				
 				sum1 += pt1*pt2;

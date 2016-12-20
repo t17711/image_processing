@@ -560,6 +560,8 @@ GLWidget::get_img(int pass,int &xx, int&yy)
 	}
 
 	// now get the max value in correlation
+	IP_castImage(flipped, BW_IMAGE, flipped2);
+
 	int t;
 	IP_getChannel(flipped2, 0, p1, t);
 	int max = -1;
@@ -576,9 +578,9 @@ GLWidget::get_img(int pass,int &xx, int&yy)
 		}
 	}
 
-		// return value
-		xx = x;
-		yy = y;
+	// return value, since i checked from -w1/2 to w1/2 and h1/2 to h1/2 in fshader
+	xx = x;
+	yy = y;
 
 	glViewport(0, 0, m_winW, m_winH);
 

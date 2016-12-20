@@ -139,21 +139,24 @@ Correlation::load()
 	(g_mainWindowP->glw()->setTemplateTexture(m_image));
 	
 
-	ChannelPtr<uchar> p;;
+	ChannelPtr<uchar> p1,p2,p3;;
 	int type;
 	
 	int total = m_width_k*m_height_k;
 
 	m_normalizer = 0.0f;
 
-	int ch;
-	for (ch = 0; IP_getChannel(m_kernel, ch, p, type); ch++) {
-		for (int i = 0; i < total; i++) {
-			m_normalizer += ((float)p[i] / 255.0f * (float)p[i] / 255.0f);
-		}
-	}
 	
-	m_normalizer = sqrt(m_normalizer/ch);
+	IP_getChannel(m_kernel, 0, p1, type);
+	IP_getChannel(m_kernel, 1, p2, type);
+	IP_getChannel(m_kernel, 2, p3, type);
+	for (int i = 0; i < total; i++) {
+		float v = ((float)p1[i] * 0.2126f + (float)p2[i] * 0.7152f + (float)p3[i] * 0.0722f) / 255.0f;
+		m_normalizer += v*v;
+	}
+
+	
+	m_normalizer = sqrt(m_normalizer);
 	g_mainWindowP->preview();
 
 		return 1;
@@ -266,6 +269,8 @@ int Correlation::GPU_out()
 	// get the coordinates, i wrote this function
 	g_mainWindowP->glw()->get_img(PASS1,x,y);
 
+	x = (x - m_width_k / 2);
+	y = (y - m_height_k / 2);
 	// do correlation on grey
 	ImagePtr  Kernel_BW;
 	ImagePtr m_gpu_out;// = IP_allocImage(w, h, RGB_TYPE);
@@ -309,15 +314,20 @@ void Correlation::initShader()
 	// init uniform hash table based on uniform variable names and location IDs
 	uniforms["u_WStep_s"] = WSTEP_S;
 	uniforms["u_HStep_s"] = HSTEP_S;
+
 	uniforms["u_Wsize_k"] = WSIZE_K;
 	uniforms["u_Hsize_k"] = HSIZE_K;
+
 	uniforms["u_WStep_k"] = WSTEP_K;
 	uniforms["u_HStep_k"] = HSTEP_K;
+
 	uniforms["u_Sampler"] = SAMPLER;
 	uniforms["u_Kernel"] = KERNEL;
+
 	uniforms["u_Color"] = COLOR;
 	uniforms["u_filter"] = PASS;
 	uniforms["u_normalizor"] = NORMALIZER;
+
 	QString v_name = ":/vshader_passthrough";
 	QString f_name = ":/hw2/fshader_correlation";
 
@@ -347,6 +357,13 @@ void Correlation::gpuProgram(int pass)
 	int h_size = m_height_k;
 	if (w_size % 2 == 0) ++w_size;
 	if (h_size % 2 == 0) ++h_size;
+
+	int w_size_s = m_width_i;
+	int h_size_s = m_height_i;
+	if (w_size_s % 2 == 0) ++w_size_s;
+	if (h_size_s % 2 == 0) ++h_size_s;
+
+
 	if (m_filter) {
 		GPU_initialize();
 	}
@@ -361,8 +378,8 @@ void Correlation::gpuProgram(int pass)
 	glUniform1f(m_uniform[pass][NORMALIZER], m_normalizer);
 	glUniform1i(m_uniform[pass][PASS], m_filter);
 	// pass values for texture
-	glUniform1f(m_uniform[pass][WSTEP_S], (GLfloat) 1.0f / m_width_i);
-	glUniform1f(m_uniform[pass][HSTEP_S], (GLfloat) 1.0f / m_height_i);
+	glUniform1f(m_uniform[pass][WSTEP_S], (GLfloat) 1.0f / w_size_s);
+	glUniform1f(m_uniform[pass][HSTEP_S], (GLfloat) 1.0f / h_size_s);
 
 	// pass values for correlate
 	glUniform1i(m_uniform[pass][HSIZE_K], h_size);
