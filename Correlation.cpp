@@ -147,37 +147,38 @@ void Correlation::setoutput(ImagePtr I1, ImagePtr kernel, ImagePtr I2, int xx, i
 	IP_copyImageHeader(I1, I2);
 	int total = m_width_i * m_height_i;
 
-	if (xx > m_width_i - m_width_k) xx = m_width_i - m_width_k;
-	if (xx > m_height_i - m_height_k) yy = m_height_i - m_height_k;
+	int w = m_width_i;
+	int h = m_height_i;
 
 	int type;
 	ChannelPtr<uchar> p1, p1_2, p2, p3, endd;
 	for (int ch = 0; IP_getChannel(I1, ch, p1, type); ch++) {
-		p1_2 = p1;
-		IP_getChannel(I2, ch, p2, type);
+
+		int type;
 		IP_getChannel(kernel, ch, p3, type);
+		IP_getChannel(I2, ch, p2, type);
 
-
-		// go upto yy th row
-		for (endd = p1_2 + yy*m_width_i; (p1 < endd);) *p2++ = (*p1++) / 2;
-
-		// go upto m_width_i * m_kernel_height row
-		int x = 0;
-		for (endd += (m_height_k-1)*m_width_i; p1 < endd && *p3!=NULL && *p1!=NULL;)
-		{
-			if (xx <= x && x < (xx + m_width_k)){
-				*p2++ = (*p1++) / 2 + (*p3++) / 2;
+		for (int row = 0; row < h; row++) {
+			for (int col = 0; col < w; col++) {
+				if (row >= yy && row < yy + m_height_k && col >= xx && col < xx + m_width_k) {
+					if (row == yy) *p2 = 255;
+					else if (col == xx) *p2 = 255;
+					else if (row == yy + m_height_k-1) *p2 = 255;
+					else if (col == xx + m_width_k-1) *p2 = 255;
+					else
+						*p2 = *p3 / 2 + *p1 / 2;;
+					p2++; p1++; p3++;
+				}
+				else {
+					*p2 = *p1 / 2;
+					p2++; p1++;
+				}
 			}
-			else
-				*p2++ = (*p1++) / 2;
-			x++;
-			x = x%m_width_i; // make it be in range
+
 		}
-
-		// go rest
-		for (endd = p1_2 + total; p1 < endd;) *p2++ = (*p1++) / 2;
-
 	}
+
+
 }
 
 void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
@@ -201,10 +202,10 @@ void Correlation::corr(ImagePtr I1, ImagePtr kernel, ImagePtr I2)
 	IP_copyImageHeader(kernel, Kernel_BW);
 	IP_castImage(kernel, BW_IMAGE, Kernel_BW);
 
-	IP_copyImageHeader(I1, I1_BW);
-	IP_castImage(I1, BW_IMAGE, I1_BW);
 
 	if (m_color) {
+		IP_copyImageHeader(I1, I1_BW);
+		IP_castImage(I1, BW_IMAGE, I1_BW);
 		val = IP_correlation(I1_BW, Kernel_BW, 1, 1, xx, yy);
 	}
 	else {
@@ -244,8 +245,6 @@ int Correlation::GPU_out()
 
 	
 	g_mainWindowP->glw()->get_img(PASS1,x,y);
-
-
 
 	// do correlation on grey
 	ImagePtr  Kernel_BW;
@@ -343,11 +342,12 @@ void Correlation::gpuProgram(int pass)
 		m_GPU_out->setDisabled(false);
 		QImage m_image;
 		IP_IPtoQImage(m_kernel, m_image);
+
+		ImagePtr c;
+		IP_castImage(m_kernel, BW_IMAGE, c);
 	
 		m_tex = (g_mainWindowP->glw()->setTemplateTexture(m_image));
 		
-		ImagePtr c;
-		IP_castImage(m_kernel, BW_IMAGE, c);	
 		ChannelPtr<uchar> p;
 		int type;
 		IP_getChannel(c, 0, p, type);

@@ -548,29 +548,34 @@ GLWidget::get_img(int pass,int &xx, int&yy)
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//// uninterleave image
 	//ImagePtr ipImage = IP_allocImage(m_winW, m_winH, RGB_TYPE);
-	//IP_uninterleave(I, ipImage);
 	//
+	//IP_uninterleave(I, ipImage);
+	
 	
 	// flip output image
-	ImagePtr flipped;
-	ImagePtr ipImage = g_mainWindowP->imageDst();
-	IP_copyImageHeader(ipImage, flipped);
+
+	ImagePtr flipped, flipped2;
+	IP_castImage(g_mainWindowP->imageDst(), BW_IMAGE, flipped2);
+//	ImagePtr ipImage = g_mainWindowP->imageDst();
+
+
+	IP_copyImageHeader(flipped2, flipped);
+
 	int type;
-	int w1 = ipImage->width();
-	int h1 = ipImage->height();
+	int w1 = flipped2->width();
+	int h1 = flipped2->height();
 	int total = w1*h1;
 	ChannelPtr<uchar> p1, p2, endd;
 
-	for (int ch = 0; IP_getChannel(ipImage, ch, p1, type); ch++) {
-		for (int i = 1; i <= h1; i++) { // do row by row flip, so loop by col
-			IP_getChannel(flipped, ch, p2, type);
-			p2 += (total - i*w1); // so go to the begining of the last row for 1st step, then 2nd last row and so on
-
-			for (int j = 0; j < w1; j++) {// copy row
-				*p2++ = *p1++; // copy 1st row into last row
-			}
+	IP_getChannel(flipped2, 0, p1, type);
+	for (int i = 1; i <= h1; i++) { // do row by row flip, so loop by col
+		IP_getChannel(flipped, 0, p2, type);
+		p2 += (total - i*w1); // so go to the begining of the last row for 1st step, then 2nd last row and so on
+		for (int j = 0; j < w1; j++) {// copy row
+			*p2++ = *p1++; // copy 1st row into last row
 		}
 	}
+	
 
 	int t;
 	IP_getChannel(flipped, 0, p1, t);
@@ -582,7 +587,7 @@ GLWidget::get_img(int pass,int &xx, int&yy)
 			uchar v = p1[j+i*w1];
 			if (max < v) {
 				max = v;
-				x = j;
+				x = w1-j;
 				y = i;
 
 			}
