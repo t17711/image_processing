@@ -259,13 +259,7 @@ int Correlation::GPU_out()
 	if (!m_gpu_processed) return 0;
 	if (m_kernel.isNull()) return 0;
 
-	//ImagePtr m_Gpu_output;
-	int w = m_width_i;
-	int h = m_height_i;
-	int total = w*h;
-
 	int x,y;
-
 	// get the coordinates, i wrote this function
 	g_mainWindowP->glw()->get_img(PASS1,x,y);
 
@@ -278,7 +272,6 @@ int Correlation::GPU_out()
 	ImagePtr  Kernel_BW;
 	ImagePtr m_gpu_out;// = IP_allocImage(w, h, RGB_TYPE);
 
-	
 	// get over lapped image
 	if (!m_color) {
 		IP_castImage(m_kernel, BW_IMAGE, Kernel_BW);
@@ -357,15 +350,10 @@ void Correlation::gpuProgram(int pass)
 
 
 	int w_size = m_width_k;
-	int h_size = m_height_k;
-	if (w_size % 2 == 0) ++w_size;
-	if (h_size % 2 == 0) ++h_size;
-
+	int h_size =  m_height_k;
 	int w_size_s = m_width_i;
 	int h_size_s = m_height_i;
-	if (w_size_s % 2 == 0) ++w_size_s;
-	if (h_size_s % 2 == 0) ++h_size_s;
-
+	
 
 	if (m_filter) {
 		GPU_initialize();

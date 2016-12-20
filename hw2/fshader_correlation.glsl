@@ -58,7 +58,6 @@ void main() {
 		
 
 		gl_FragColor = vec4(vec3(out1),1.0f);	
-		//gl_FragColor = (texture2D(u_Kernel,v_TexCoord));
 
 	}
 	else{
