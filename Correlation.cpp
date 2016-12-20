@@ -269,8 +269,11 @@ int Correlation::GPU_out()
 	// get the coordinates, i wrote this function
 	g_mainWindowP->glw()->get_img(PASS1,x,y);
 
-	x = (x - m_width_k / 2);
+	// x and y are maximum in flipped image
+	// get toe row and col values
+	x = (x - m_width_k / 2);  // subtract by half kernel width since we want to get topleft of kernel position
 	y = (y - m_height_k / 2);
+
 	// do correlation on grey
 	ImagePtr  Kernel_BW;
 	ImagePtr m_gpu_out;// = IP_allocImage(w, h, RGB_TYPE);

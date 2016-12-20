@@ -530,46 +530,37 @@ void
 GLWidget::get_img(int pass,int &xx, int&yy)
 {
 
-	ImagePtr flipped, flipped2;
+	ImagePtr flipped, output;
 
 	// get the correlation data stored in dest image, in BW
-	flipped2 = g_mainWindowP->imageDst();
+	output = g_mainWindowP->imageDst();
 
 	// create new image to flip
-	IP_copyImageHeader(flipped2, flipped);
+	IP_copyImageHeader(output, flipped);
 
 	int type;
-	int w1 = flipped2->width();
-	int h1 = flipped2->height();
+	int w1 = output->width();
+	int h1 = output->height();
 	int total = w1*h1;
 	ChannelPtr<uchar> p1, p2, endd;
 
-	// flip the rows of image
-	for (int ch = 0; IP_getChannel(flipped2, ch, p1, type); ch++) {
-		//for (int i = 1; i <= h1; i++) { // do row by row flip, so loop by col
-		//	IP_getChannel(flipped, ch, p2, type);
-		//	p2 += (total - i*w1); // so go to the begining of the last row for 1st step, then 2nd last row and so on
-		//	for (int j = 0; j < w1; j++) {// copy row
-		//		*p2++ = *p1++; // copy 1st row into last row
-		//	}
-		//}
+	// flip pixels
+	for (int ch = 0; IP_getChannel(output, ch, p1, type); ch++) {
 		IP_getChannel(flipped, ch, p2, type);
 		p1 += total - 1;
 		while (*p1 != NULL) *p2++ = *p1--;
 
 	}
 
-	// now get the max value in correlation
-	IP_castImage(flipped, BW_IMAGE, flipped2);
 
 	int t;
-	IP_getChannel(flipped2, 0, p1, t);
+	IP_getChannel(flipped, 0, p1, t);
 	int max = -1;
 	int x = 0, y = 0;
 	for (int i = 0; i < h1; i++) {
 		for (int j = 0; j < w1; j++) {
 			uchar v = *p1++;
-			if (max < v) {
+			if (max < v) { // get the first maximum value
 				max = v;
 				x = j; // this is maximum row pos
 				y = i; // max col pos
@@ -578,7 +569,6 @@ GLWidget::get_img(int pass,int &xx, int&yy)
 		}
 	}
 
-	// return value, since i checked from -w1/2 to w1/2 and h1/2 to h1/2 in fshader
 	xx = x;
 	yy = y;
 
