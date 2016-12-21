@@ -265,7 +265,7 @@ int Correlation::GPU_out()
 
 	// x and y are maximum in flipped image
 	// get toe row and col values
-	x = (x - m_width_k / 2);  // subtract by half kernel width since we want to get topleft of kernel position
+	x = (x - m_width_k / 2);  // subtract by half kernel width since we want to get top left of kernel position
 	y = (y - m_height_k / 2);
 
 	// do correlation on grey
