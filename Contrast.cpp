@@ -15,7 +15,7 @@ void Contrast::changeBrightnessD(double val) { changeBrightnessI((int) val); }
 void Contrast::changeContrastD  (double val) { changeContrastI  ((int) val); }
 
 extern MainWindow *g_mainWindowP;
-
+enum { BRIGHTNESS, U_CONTRAST, SAMPLER };
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Contrast::Contrast:
 //
@@ -96,7 +96,7 @@ Contrast::controlPanel()
 // Return 1 for success, 0 for failure.
 //
 bool
-Contrast::applyFilter(ImagePtr I1, ImagePtr I2)
+Contrast::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 {
 	// error checking
 	if(I1.isNull()) return 0;
@@ -110,8 +110,12 @@ Contrast::applyFilter(ImagePtr I1, ImagePtr I2)
 		c = c/25.  + 1.0;	// slope: 1 to 5
 	else	c = 1 + (c/133.);	// slope: .25 to 1
 
-        // apply filter
-        contrast(I1, b, c, I2);
+	// apply filter
+	if(!(gpuFlag && m_shaderFlag))
+		// apply CPU based filter
+		contrast(I1, b, c, I2);
+	else
+		g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
 
 	return 1;
 }
@@ -200,4 +204,62 @@ Contrast::reset()
 
 	// apply filter and display output
 	g_mainWindowP->preview();
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Contrast::initShader:
+//
+// init shader program and parameters.
+//
+void
+Contrast::initShader() 
+{
+	m_nPasses = 1;
+	// initialize GL function resolution for current context
+	initializeGLFunctions();
+
+	UniformMap uniforms;
+
+	// init uniform hash table based on uniform variable names and location IDs
+	uniforms["u_Brightness"] = BRIGHTNESS;
+	uniforms["u_Contrast"  ] = U_CONTRAST;
+	uniforms["u_Sampler"   ] = SAMPLER;
+
+        QString v_name = ":/vshader_passthrough";
+        QString f_name = ":/hw1/fshader_contrast";
+        
+#ifdef __APPLE__
+        v_name += "_Mac";
+        f_name += "_Mac"; 
+#endif    
+
+	// compile shader, bind attribute vars, link shader, and initialize uniform var table
+	g_mainWindowP->glw()->initShader(m_program[PASS1], 
+	                                 v_name + ".glsl", 
+	                                 f_name + ".glsl",
+					 uniforms,
+					 m_uniform[PASS1]);
+	m_shaderFlag = true;
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Contrast::gpuProgram:
+//
+// Active gpu program
+//
+void
+Contrast::gpuProgram(int pass) 
+{
+	float c = m_slider[1]->value();	// contrast
+	float b = (float) m_slider[0]->value()/MXGRAY;
+	// convert contrast from [-100,100] slider range to [0,5] range
+	if(c >=0)
+		c = c/25.0f  + 1.0f;	// slope: 1 to 5
+	else	c = 1 + (c/133.0f);	// slope: .25 to 1
+	glUseProgram(m_program[pass].programId());
+	glUniform1f (m_uniform[pass][BRIGHTNESS], b);
+	glUniform1f (m_uniform[pass][U_CONTRAST], c);
+	glUniform1i (m_uniform[pass][SAMPLER], 0);
 }

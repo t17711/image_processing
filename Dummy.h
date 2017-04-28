@@ -26,10 +26,12 @@ class Dummy : public ImageFilter {
 public:
 	Dummy		(QWidget *parent = 0);		// constructor
 	QGroupBox*	controlPanel();			// create control panel
+	void		initShader();
+	void		gpuProgram(int pass);		// use GPU program to apply filter
 
 private:
 	// widgets and groupbox
-	QGroupBox	*m_ctrlGrp;			// groupbox for panel
+	QGroupBox*	m_ctrlGrp;			// groupbox for panel
 };
 
 

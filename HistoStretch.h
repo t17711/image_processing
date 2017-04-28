@@ -16,11 +16,13 @@ class HistoStretch : public ImageFilter {
 	Q_OBJECT
 
 public:
-	HistoStretch			(QWidget *parent = 0);	// constructor
-	QGroupBox*	controlPanel	();			// create control panel
-	bool		applyFilter	(ImagePtr, ImagePtr);	// apply filter to input
-	void		reset		();			// reset parameters
+	HistoStretch			(QWidget *parent = 0);		// constructor
+	QGroupBox*	controlPanel	();				// create control panel
+	bool		applyFilter	(ImagePtr, bool, ImagePtr);	// apply filter to input
+	void		reset		();				// reset parameters
 	void		histoStretch	(ImagePtr, int, int, ImagePtr);
+	void		initShader();
+	void		gpuProgram(int pass);	// use GPU program to apply filter
 
 protected slots:
 	void		changeThr1	(int);
@@ -30,11 +32,11 @@ protected slots:
 
 private:
 	// widgets
-	QSlider		*m_slider [2];	// HistoStretch sliders
-	QSpinBox	*m_spinBox[2];	// HistoStretch spin boxes
-	QCheckBox	*m_thr1;	// min histogram threshold control
-	QCheckBox	*m_thr2;	// max histogram threshold control
-	QGroupBox	*m_ctrlGrp;	// groupbox for panel
+	QSlider*	m_slider [2];	// HistoStretch sliders
+	QSpinBox*	m_spinBox[2];	// HistoStretch spin boxes
+	QCheckBox*	m_thr1;		// min histogram threshold control
+	QCheckBox*	m_thr2;		// max histogram threshold control
+	QGroupBox*	m_ctrlGrp;	// groupbox for panel
 
 	// state variables
 	int		 m_thrFlag1;	// flag for finding min histogram value

@@ -17,11 +17,13 @@ class Quantize : public ImageFilter {
 	Q_OBJECT
 
 public:
-	Quantize			(QWidget *parent = 0);	// constructor
-	QGroupBox*	controlPanel	();			// create control panel
-	bool		applyFilter	(ImagePtr, ImagePtr);	// apply filter to input
-	void		reset		();			// reset parameters
+	Quantize			(QWidget *parent = 0);		// constructor
+	QGroupBox*	controlPanel	();				// create control panel
+	bool		applyFilter	(ImagePtr, bool, ImagePtr);	// apply filter to input
+	void		reset		();				// reset parameters
 	void		quantize	(ImagePtr, int, bool, ImagePtr);
+	void		initShader();
+	void		gpuProgram(int pass);	// use GPU program to apply filter
 
 protected slots:
 	void		changeLevels	(int);
@@ -29,10 +31,10 @@ protected slots:
 
 private:
 	// widgets
-	QSlider		*m_slider ;	// Quantize sliders
-	QSpinBox	*m_spinBox;	// Quantize spin boxes
-	QCheckBox	*m_checkBox;	// Quantize checkbox
-	QGroupBox	*m_ctrlGrp;	// Groupbox for panel
+	QSlider*	m_slider ;	// Quantize slider
+	QSpinBox*	m_spinBox;	// Quantize spin box
+	QCheckBox*	m_checkBox;	// Quantize checkbox
+	QGroupBox*	m_ctrlGrp;	// Groupbox for panel
 };
 
 #endif	// QUANTIZE_H

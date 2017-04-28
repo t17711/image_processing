@@ -17,7 +17,7 @@
 // the control panel, reset function, and add homework solution. 
 //
 ImageFilter::ImageFilter(QWidget *parent)
-   : QWidget (parent)
+	: QWidget(parent), m_shaderFlag(false)
 {}
 
 
@@ -42,7 +42,7 @@ ImageFilter::controlPanel()
 // Return 1 for success, 0 for failure.
 //
 bool
-ImageFilter::applyFilter(ImagePtr, ImagePtr) 
+ImageFilter::applyFilter(ImagePtr, bool, ImagePtr) 
 {
 	return true;
 }
@@ -56,3 +56,21 @@ ImageFilter::applyFilter(ImagePtr, ImagePtr)
 //
 void
 ImageFilter::reset() {}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ImageFilter::initShader:
+//
+// init shader program and parameters.
+//
+void
+ImageFilter::initShader() {}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ImageFilter::gpuProgram:
+//
+// Active gpu program
+//
+void
+ImageFilter::gpuProgram(int) {}

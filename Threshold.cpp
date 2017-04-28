@@ -13,6 +13,10 @@
 
 extern MainWindow *g_mainWindowP;
 
+
+// uniform ID
+enum { THR, SAMPLER };
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Threshold::Threshold:
 //
@@ -75,7 +79,7 @@ Threshold::controlPanel()
 // Return 1 for success, 0 for failure.
 //
 bool
-Threshold::applyFilter(ImagePtr I1, ImagePtr I2)
+Threshold::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 {
 	// error checking
 	if(I1.isNull()) return 0;
@@ -86,8 +90,11 @@ Threshold::applyFilter(ImagePtr I1, ImagePtr I2)
 	// error checking
 	if(thr < 0 || thr > MXGRAY) return 0;
 
-	// apply filter
-	threshold(I1, thr, I2);
+	if(!(gpuFlag && m_shaderFlag))
+		// apply CPU based filter
+		threshold(I1, thr, I2);
+	else 
+		g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
 
 	return 1;
 }
@@ -149,4 +156,55 @@ Threshold::reset()
 
 	// apply filter and display output
 	g_mainWindowP->preview();
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Threshold::initShader:
+//
+// init shader program and parameters.
+//
+void
+Threshold::initShader() 
+{
+	m_nPasses = 1;
+	// initialize GL function resolution for current context
+	initializeGLFunctions();
+
+	UniformMap uniforms;
+
+	// init uniform hash table based on uniform variable names and location IDs
+	uniforms["u_thr"    ] = THR;
+	uniforms["u_Sampler"] = SAMPLER;
+	
+        QString v_name = ":/vshader_passthrough";
+        QString f_name = ":/hw1/fshader_threshold";
+        
+#ifdef __APPLE__
+        v_name += "_Mac";
+        f_name += "_Mac"; 
+#endif    
+
+	// compile shader, bind attribute vars, link shader, and initialize uniform var table
+	g_mainWindowP->glw()->initShader(m_program[PASS1], 
+	                                 v_name + ".glsl", 
+	                                 f_name + ".glsl",
+					 uniforms,
+					 m_uniform[PASS1]);
+	m_shaderFlag = true;
+
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Threshold::gpuProgram:
+//
+// Active Threshold gpu program
+//
+void
+Threshold::gpuProgram(int pass)
+{
+	glUseProgram(m_program[pass].programId());
+	glUniform1f (m_uniform[pass][THR], (GLfloat) m_slider->value()/MXGRAY);
+	glUniform1i (m_uniform[pass][SAMPLER], 0);
 }

@@ -1,13 +1,23 @@
-﻿################################################################################
+################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-*.cpp
-*.suo
-/obj/qip.tlog/CL.command.1.tlog
-*.tlog
-*.log
-*.pdb
-*.db
-*.opendb
-*.filters
+
+/debug
+/obj
+/release
+/qip.vcxproj.user
+/qip.VC.VC.opendb
+/qip.VC.db
+/qip.sln
+/qip.pro.user
+!**.cpp
+!**.h
+!**.glsl
+/.vs
+/.vs**
+**.sln
+**.db
+**.vcxproj**
+/moc**
+

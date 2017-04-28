@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011, 2012, 2013, 2014 Emanuel Eichhammer               **
+**  Copyright (C) 2011, 2012, 2013, 2014 Emanuel Eichammer               **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -17,7 +17,7 @@
 **  along with this program.  If not, see http://www.gnu.org/licenses/.   **
 **                                                                        **
 ****************************************************************************
-**           Author: Emanuel Eichhammer                                   **
+**           Author: Emanuel Eichammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
 **             Date: 27.12.14                                             **
 **          Version: 1.3.0                                                **
@@ -2812,10 +2812,10 @@ void QCPLayoutGrid::updateLayout()
   getMinimumRowColSizes(&minColWidths, &minRowHeights);
   getMaximumRowColSizes(&maxColWidths, &maxRowHeights);
   
-  int totalRowSpacing = (rowCount()-1) * mRowSpacing;
+  int totaxSpacing = (rowCount()-1) * mRowSpacing;
   int totalColSpacing = (columnCount()-1) * mColumnSpacing;
   QVector<int> colWidths = getSectionSizes(maxColWidths, minColWidths, mColumnStretchFactors.toVector(), mRect.width()-totalColSpacing);
-  QVector<int> rowHeights = getSectionSizes(maxRowHeights, minRowHeights, mRowStretchFactors.toVector(), mRect.height()-totalRowSpacing);
+  QVector<int> rowHeights = getSectionSizes(maxRowHeights, minRowHeights, mRowStretchFactors.toVector(), mRect.height()-totaxSpacing);
   
   // go through cells and set rects accordingly:
   int yOffset = mRect.top();
@@ -4018,7 +4018,7 @@ QCPAxis::QCPAxis(QCPAxisRect *parent, AxisType type) :
   mSelectedTickLabelFont(QFont(mTickLabelFont.family(), mTickLabelFont.pointSize(), QFont::Bold)),
   mTickLabelColor(Qt::black),
   mSelectedTickLabelColor(Qt::blue),
-  mDateTimeFormat(QLatin1String("hh:mm:ss\ndd.MM.yy")),
+  mDateTimeFormat(QLatin1String("h:mm:ss\ndd.MM.yy")),
   mDateTimeSpec(Qt::LocalTime),
   mNumberPrecision(6),
   mNumberFormatChar('g'),
@@ -5581,7 +5581,7 @@ void QCPAxis::setupTickVectors()
     {
       for (int i=mLowestVisibleTick; i<=mHighestVisibleTick; ++i)
       {
-#if QT_VERSION < QT_VERSION_CHECK(4, 7, 0) // use fromMSecsSinceEpoch function if available, to gain sub-second accuracy on tick labels (e.g. for format "hh:mm:ss:zzz")
+#if QT_VERSION < QT_VERSION_CHECK(4, 7, 0) // use fromMSecsSinceEpoch function if available, to gain sub-second accuracy on tick labels (e.g. for format "h:mm:ss:zzz")
         mTickVectorLabels[i] = mParentPlot->locale().toString(QDateTime::fromTime_t(mTickVector.at(i)).toTimeSpec(mDateTimeSpec), mDateTimeFormat);
 #else
         mTickVectorLabels[i] = mParentPlot->locale().toString(QDateTime::fromMSecsSinceEpoch(mTickVector.at(i)*1000).toTimeSpec(mDateTimeSpec), mDateTimeFormat);
@@ -11579,9 +11579,9 @@ void QCPColorGradient::updateColorBuffer()
           case ciHSV:
           {
             QColor lowHsv = low.value().toHsv();
-            QColor highHsv = high.value().toHsv();
+            QColor highsv = high.value().toHsv();
             double hue = 0;
-            double hueDiff = highHsv.hueF()-lowHsv.hueF();
+            double hueDiff = highsv.hueF()-lowHsv.hueF();
             if (hueDiff > 0.5)
               hue = lowHsv.hueF() - t*(1.0-hueDiff);
             else if (hueDiff < -0.5)
@@ -11590,7 +11590,7 @@ void QCPColorGradient::updateColorBuffer()
               hue = lowHsv.hueF() + t*hueDiff;
             if (hue < 0) hue += 1.0;
             else if (hue >= 1.0) hue -= 1.0;
-            mColorBuffer[i] = QColor::fromHsvF(hue, (1-t)*lowHsv.saturationF() + t*highHsv.saturationF(), (1-t)*lowHsv.valueF() + t*highHsv.valueF()).rgb();
+            mColorBuffer[i] = QColor::fromHsvF(hue, (1-t)*lowHsv.saturationF() + t*highsv.saturationF(), (1-t)*lowHsv.valueF() + t*highsv.valueF()).rgb();
             break;
           }
         }
@@ -15864,7 +15864,7 @@ void QCPGraph::drawError(QCPPainter *painter, double x, double y, const QCPData 
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
   
   double a, b; // positions of error bar bounds in pixels
-  double barWidthHalf = mErrorBarSize*0.5;
+  double barWidthalf = mErrorBarSize*0.5;
   double skipSymbolMargin = mScatterStyle.size(); // pixels left blank per side, when mErrorBarSkipSymbol is true
 
   if (keyAxis->orientation() == Qt::Vertical)
@@ -15886,8 +15886,8 @@ void QCPGraph::drawError(QCPPainter *painter, double x, double y, const QCPData 
       } else
         painter->drawLine(QLineF(x, a, x, b));
       // draw handles:
-      painter->drawLine(QLineF(x-barWidthHalf, a, x+barWidthHalf, a));
-      painter->drawLine(QLineF(x-barWidthHalf, b, x+barWidthHalf, b));
+      painter->drawLine(QLineF(x-barWidthalf, a, x+barWidthalf, a));
+      painter->drawLine(QLineF(x-barWidthalf, b, x+barWidthalf, b));
     }
     if (mErrorType == etValue || mErrorType == etBoth)
     {
@@ -15905,8 +15905,8 @@ void QCPGraph::drawError(QCPPainter *painter, double x, double y, const QCPData 
       } else
         painter->drawLine(QLineF(a, y, b, y));
       // draw handles:
-      painter->drawLine(QLineF(a, y-barWidthHalf, a, y+barWidthHalf));
-      painter->drawLine(QLineF(b, y-barWidthHalf, b, y+barWidthHalf));
+      painter->drawLine(QLineF(a, y-barWidthalf, a, y+barWidthalf));
+      painter->drawLine(QLineF(b, y-barWidthalf, b, y+barWidthalf));
     }
   } else // mKeyAxis->orientation() is Qt::Horizontal
   {
@@ -15927,8 +15927,8 @@ void QCPGraph::drawError(QCPPainter *painter, double x, double y, const QCPData 
       } else
         painter->drawLine(QLineF(a, y, b, y));
       // draw handles:
-      painter->drawLine(QLineF(a, y-barWidthHalf, a, y+barWidthHalf));
-      painter->drawLine(QLineF(b, y-barWidthHalf, b, y+barWidthHalf));
+      painter->drawLine(QLineF(a, y-barWidthalf, a, y+barWidthalf));
+      painter->drawLine(QLineF(b, y-barWidthalf, b, y+barWidthalf));
     }
     if (mErrorType == etValue || mErrorType == etBoth)
     {
@@ -15946,8 +15946,8 @@ void QCPGraph::drawError(QCPPainter *painter, double x, double y, const QCPData 
       } else
         painter->drawLine(QLineF(x, a, x, b));
       // draw handles:
-      painter->drawLine(QLineF(x-barWidthHalf, a, x+barWidthHalf, a));
-      painter->drawLine(QLineF(x-barWidthHalf, b, x+barWidthHalf, b));
+      painter->drawLine(QLineF(x-barWidthalf, a, x+barWidthalf, a));
+      painter->drawLine(QLineF(x-barWidthalf, b, x+barWidthalf, b));
     }
   }
 }

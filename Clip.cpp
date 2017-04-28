@@ -2,7 +2,7 @@
 // IMPROC: Image Processing Software Package
 // Copyright (C) 2016 by George Wolberg
 //
-// Clip.cpp - Brightness/Clip widget.
+// Clip.cpp - Clip widget.
 //
 // Written by: George Wolberg, 2016
 // ======================================================================
@@ -13,6 +13,8 @@
 
 extern MainWindow *g_mainWindowP;
 
+// uniform ID
+enum { THR1, THR2, SAMPLER };
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Clip::Clip:
 //
@@ -87,7 +89,7 @@ Clip::controlPanel()
 // Return 1 for success, 0 for failure.
 //
 bool
-Clip::applyFilter(ImagePtr I1, ImagePtr I2)
+Clip::applyFilter(ImagePtr I1, bool gpuFlag, ImagePtr I2)
 {
 	// error checking
 	if(I1.isNull()) return 0;
@@ -97,7 +99,11 @@ Clip::applyFilter(ImagePtr I1, ImagePtr I2)
 	int thr2 = m_slider[1]->value();
 
         // apply filter
-        clip(I1, thr1, thr2, I2);
+	if(!(gpuFlag && m_shaderFlag))
+		// apply CPU based filter
+		clip(I1, thr1, thr2, I2);
+	else
+		g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
 
 	return 1;
 }
@@ -128,6 +134,9 @@ Clip::clip(ImagePtr I1, int t1, int t2, ImagePtr I2)
 void
 Clip::changeThr1(int val)
 {
+	int thr2 = m_slider[1]->value();
+	if(val > thr2) val = thr2;
+
 	m_slider [0]->blockSignals(true);
 	m_slider [0]->setValue    (val );
 	m_slider [0]->blockSignals(false);
@@ -149,6 +158,9 @@ Clip::changeThr1(int val)
 void
 Clip::changeThr2(int val)
 {
+	int thr1 = m_slider[0]->value();
+	if(val < thr1) val = thr1;
+
 	m_slider [1]->blockSignals(true);
 	m_slider [1]->setValue    (val );
 	m_slider [1]->blockSignals(false);
@@ -182,4 +194,56 @@ Clip::reset()
 
 	// apply filter and display output
 	g_mainWindowP->preview();
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Clip::initShader:
+//
+// init shader program and parameters.
+//
+void
+Clip::initShader() 
+{
+	m_nPasses = 1;
+	// initialize GL function resolution for current context
+	initializeGLFunctions();
+
+	UniformMap uniforms;
+
+	// init uniform hash table based on uniform variable names and location IDs
+	uniforms["u_Thr1"   ] = THR1;
+	uniforms["u_Thr2"   ] = THR2;
+	uniforms["u_Sampler"] = SAMPLER;
+
+        QString v_name = ":/vshader_passthrough";
+        QString f_name = ":/hw1/fshader_clip";
+        
+#ifdef __APPLE__
+        v_name += "_Mac";
+        f_name += "_Mac"; 
+#endif    
+
+	// compile shader, bind attribute vars, link shader, and initialize uniform var table
+	g_mainWindowP->glw()->initShader(m_program[PASS1], 
+	                                 v_name + ".glsl", 
+	                                 f_name + ".glsl",
+					 uniforms,
+					 m_uniform[PASS1]);
+	m_shaderFlag = true;
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Clip::gpuProgram:
+//
+// Active gpu program
+//
+void
+Clip::gpuProgram(int pass) 
+{
+	glUseProgram(m_program[pass].programId());
+	glUniform1f (m_uniform[pass][THR1], (GLfloat) m_slider[0]->value()/MXGRAY);
+	glUniform1f (m_uniform[pass][THR2], (GLfloat) m_slider[1]->value()/MXGRAY);
+	glUniform1i (m_uniform[pass][SAMPLER], 0);
 }

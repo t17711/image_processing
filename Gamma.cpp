@@ -12,7 +12,8 @@
 #include "hw1/HW_gamma.cpp"
 
 extern MainWindow *g_mainWindowP;
-
+// uniform ID
+enum { GAMMA_VALUE, SAMPLER };
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Gamma::Gamma:
 //
@@ -77,7 +78,7 @@ Gamma::controlPanel()
 // Return 1 for success, 0 for failure.
 //
 bool
-Gamma::applyFilter(ImagePtr I1, ImagePtr I2)
+Gamma::applyFilter(ImagePtr I1, bool gpuFlag,  ImagePtr I2)
 {
 	// error checking
 	if(I1.isNull()) return 0;
@@ -89,8 +90,12 @@ Gamma::applyFilter(ImagePtr I1, ImagePtr I2)
 	if(gamma < 0.1 || gamma > 10.0) return 0;
 
         // apply gamma correction
-        gammaCorrect(I1, gamma, I2);
-
+	if(!(gpuFlag && m_shaderFlag)) 
+		// apply CPU based filter
+		gammaCorrect(I1, gamma, I2);
+	 else
+		g_mainWindowP->glw()->applyFilterGPU(m_nPasses);
+        
 	return 1;
 }
 
@@ -156,12 +161,62 @@ void
 Gamma::reset()
 {
 	m_slider ->blockSignals(true);
-	m_slider ->setValue    (1);
+	m_slider ->setValue    (10);
 	m_slider ->blockSignals(false);
 	m_spinBox->blockSignals(true);
-	m_spinBox->setValue    (1);
+	m_spinBox->setValue    (10);
 	m_spinBox->blockSignals(false);
 
 	// apply filter and display output
 	g_mainWindowP->preview();
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Gamma::initShader:
+//
+// init shader program and parameters.
+//
+void
+Gamma::initShader() 
+{
+	m_nPasses = 1;
+	// initialize GL function resolution for current context
+	initializeGLFunctions();
+
+	UniformMap uniforms;
+
+	// init uniform hash table based on uniform variable names and location IDs
+	uniforms["u_gamma"  ] = GAMMA_VALUE;
+	uniforms["u_Sampler"] = SAMPLER;
+
+        QString v_name = ":/vshader_passthrough";
+        QString f_name = ":/hw1/fshader_gamma";
+        
+#ifdef __APPLE__
+        v_name += "_Mac";
+        f_name += "_Mac"; 
+#endif    
+
+	// compile shader, bind attribute vars, link shader, and initialize uniform var table
+	g_mainWindowP->glw()->initShader(m_program[PASS1], 
+	                                 v_name + ".glsl", 
+	                                 f_name + ".glsl",
+					 uniforms,
+					 m_uniform[PASS1]);
+	m_shaderFlag = true;
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Gamma::gpuProgram:
+//
+// Active gpu program
+//
+void
+Gamma::gpuProgram(int pass) 
+{
+	glUseProgram(m_program[pass].programId());
+	glUniform1f (m_uniform[pass][GAMMA_VALUE], (GLfloat) 1.0f/(m_slider->value()*0.1f));
+	glUniform1i (m_uniform[pass][SAMPLER], 0);
 }
